@@ -28,16 +28,23 @@ if [ -f "$PROFILE" ]; then echo "PROFILE_EXISTS=true"; head -20 "$PROFILE"; else
 echo "{\"skill\":\"job-search\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\":$$}" >> "$_JS_STATE/analytics/skill-usage.jsonl" 2>/dev/null || true
 
 # ─── Playwright 브라우저 스크래퍼 초기화 ─────────────
-_JS_BIN="${CLAUDE_SKILL_DIR}/../bin"
-_JS_BROWSER_SCRIPT="$_JS_BIN/fetch-jobs.mjs"
+# CLAUDE_SKILL_DIR 가 비어있는 환경(Docker 등)을 위해 알려진 경로도 탐색
+if [ -n "$CLAUDE_SKILL_DIR" ]; then
+  _JS_BIN="${CLAUDE_SKILL_DIR}/../bin"
+else
+  for _try in "/app/skills/jobstack/bin" "$HOME/.claude/skills/jobstack/bin" "/var/jobclaw/skills/jobstack/bin"; do
+    [ -f "$_try/fetch-jobs.mjs" ] && { _JS_BIN="$_try"; break; }
+  done
+fi
+_JS_BROWSER_SCRIPT="${_JS_BIN:-}/fetch-jobs.mjs"
 BROWSER_SCRAPER_AVAILABLE=false
 if [ -f "$_JS_BROWSER_SCRIPT" ]; then
-  if [ ! -d "$_JS_BIN/node_modules/playwright" ]; then
+  if [ ! -d "${_JS_BIN}/node_modules/playwright" ]; then
     (cd "$_JS_BIN" && npm install --silent 2>/dev/null || true)
   fi
-  if [ -d "$_JS_BIN/node_modules/playwright" ]; then
+  if [ -d "${_JS_BIN}/node_modules/playwright" ]; then
     BROWSER_SCRAPER_AVAILABLE=true
-    echo "BROWSER_SCRAPER=ready"
+    echo "BROWSER_SCRAPER=ready (path: $_JS_BIN)"
   fi
 fi
 echo "BROWSER_SCRAPER_AVAILABLE=$BROWSER_SCRAPER_AVAILABLE"
