@@ -103,9 +103,9 @@ echo "BROWSER_SCRAPER_AVAILABLE=$BROWSER_SCRAPER_AVAILABLE"
 
 | 플랫폼 | 방법 | 마감일 포함 | 비고 |
 |--------|------|------------|------|
-| 원티드 | ✅ JSON API | ✅ due_time 필드 | IT/스타트업 특화 |
-| 잡코리아 | ✅ HTML curl | ⚠️ 상세 페이지 필요 | 대기업/공기업 공채 |
-| 사람인 | ✅ HTML curl | ✅ date 필드 (MM/DD 형식) | 서버사이드 렌더링 |
+| 원티드 | ✅ JSON API + API detail 검증 | ✅ due_time 필드 | IT/스타트업 특화 |
+| 잡코리아 | ✅ Playwright (Tailwind 개편 대응) | ✅ MM/DD 마감일 | 대기업/공기업 공채 |
+| 사람인 | ✅ Open API (키 필요) / ❌ WebFetch 차단 | ✅ API 응답 포함 | API 키: oapi.saramin.co.kr |
 | 점핏 | ✅ Playwright | ✅ D-N 잔여일 | IT 직군 특화 |
 | 프로그래머스 | ❌ 접속 차단 | - | 제외 |
 
@@ -140,33 +140,52 @@ HTML 페이지(wd/{id})가 아닌 **API detail endpoint**를 사용하세요 —
 - `"status": "active"`이고 `"hidden": false`이면 포함 가능
 - 최대 10개까지 확인 (JSON이라 HTML보다 빠름)
 
-#### 2단계: 잡코리아 HTML
+#### 2단계: 잡코리아 Playwright 브라우저 스크래핑
 
+> 잡코리아는 Tailwind CSS 기반으로 전면 개편되어 단순 curl/WebFetch로는 목록 추출 불가.
+> `BROWSER_SCRAPER_AVAILABLE=true`일 때 Playwright를 사용하세요.
+
+```bash
+node "$_JS_BIN/fetch-jobs.mjs" jobkorea "{KEYWORD}" 20 2>/dev/null
+```
+
+**결과 JSON 필드:**
+- `platform`: "jobkorea"
+- `company`: 회사명
+- `title`: 직무명
+- `deadline`: "MM/DD(요일) 마감" / "상시채용" / "채용시마감" / "마감일 미확인"
+- `link`: `https://www.jobkorea.co.kr/Recruit/GI_Read/{id}` (쿼리스트링 제거됨)
+
+**마감일 필터링:** deadline에서 날짜("MM/DD") 추출 후 오늘 이전이면 제외. "상시채용"·"채용시마감"은 포함 가능.
+
+`BROWSER_SCRAPER_AVAILABLE=false`일 때는 WebFetch로 대체:
 ```
 https://www.jobkorea.co.kr/Search/?stext={URL인코딩된 키워드}&posted=7&ord=RegDate
 ```
 
-- HTML 목록에서 회사명, 직무명 파싱 가능
-- 마감일은 목록에 없으므로, 관심 공고는 상세 URL을 추가로 WebFetch해서 마감일 확인
-- 상세 페이지에 "마감된 공고", "채용이 마감" 등 위 필터링 문구가 있으면 즉시 제외
-- `posted=7` 파라미터로 7일 이내 게재 공고만 조회
+#### 3단계: 사람인 Playwright (공식 API 또는 점핏 대체)
 
-#### 3단계: 사람인 curl (서버사이드 렌더링, 마감일 포함)
+> **사람인 본 사이트는 봇 감지로 Playwright/WebFetch 모두 차단됩니다.**
+> 두 가지 접근 방법:
 
-> 사람인은 서버사이드 렌더링으로 curl/WebFetch가 완벽히 작동합니다.
+**방법 A — 사람인 Open API (SARAMIN_API_KEY 있을 때):**
+공식 API를 사용합니다. API 키는 무료로 발급 가능: https://oapi.saramin.co.kr/join
 
 ```bash
-# 7일 이내, 최신순 검색
-curl -sL --max-time 20 \
-  "https://www.saramin.co.kr/zf_user/search?searchword={KEYWORD}&poster_duration=7&sort=RD" \
-  -H "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36" \
-  -H "Accept-Language: ko-KR"
+# SARAMIN_API_KEY 환경변수가 설정된 경우에만 실행
+node "$_JS_BIN/fetch-jobs.mjs" saramin "{KEYWORD}" 20 2>/dev/null
 ```
 
-**마감일 파싱 규칙:**
-- HTML에서 `class="date">` 태그 내용 추출
-- 형식: `~ MM/DD(요일)` (예: `~ 05/29(금)`) 또는 `상시채용` / `채용시`
-- `~ MM/DD` → 해당 날짜가 오늘(YYYY-MM-DD) 이전이면 **반드시 제외**
+결과 JSON: `platform:"saramin"`, `company`, `title`, `deadline`(YYYY-MM-DD 형식), `link`
+
+**방법 B — SARAMIN_API_KEY 없을 때:**
+사람인 WebFetch는 공고 목록을 반환하지 않으므로 사용하지 마세요.
+대신 점핏(jumpit)에서 추가 공고를 수집하거나, 사용자에게 직접 검색 링크를 제공:
+```
+https://www.saramin.co.kr/zf_user/search?searchword={KEYWORD}&poster_duration=7&sort=RD
+```
+
+**마감일 필터링:** 방법 A의 경우 `deadline` 필드가 YYYY-MM-DD 형식. 오늘 이전이면 제외.
 - `상시채용` / `채용시` → 포함 가능 (수시채용)
 
 #### 4단계: 점핏 Playwright 브라우저 스크래핑
