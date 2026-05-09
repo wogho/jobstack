@@ -9,10 +9,16 @@
 
 import { chromium } from 'playwright';
 
-const [, , platform, keyword, limitArg, careerArg] = process.argv;
-const limit = parseInt(limitArg || '20', 10);
-// entry=신입, experienced=경력, ''=전체
-const career = (careerArg || '').toLowerCase();
+const [, , platform, keyword, arg3, arg4] = process.argv;
+// arg3이 숫자가 아니면 career로 해석 (limit 생략 호출: fetch-jobs.mjs platform keyword entry)
+let limit, career;
+if (arg3 && isNaN(parseInt(arg3, 10))) {
+  limit = 20;
+  career = arg3.toLowerCase();
+} else {
+  limit = parseInt(arg3 || '20', 10);
+  career = (arg4 || '').toLowerCase();
+}
 
 if (!platform || !keyword) {
   process.stderr.write('Usage: fetch-jobs.mjs <platform> <keyword> [limit] [career]\n');
@@ -137,8 +143,13 @@ try {
           // "2026.06.06" 형식
           const ymMatch = fullText.match(/(\d{4})\.(\d{2})\.(\d{2})/);
           if (mdMatch) {
-            const year = new Date().getFullYear();
-            deadline = `${year}-${mdMatch[1]}-${mdMatch[2]}`;
+            const month = parseInt(mdMatch[1], 10);
+            const day = parseInt(mdMatch[2], 10);
+            let year = new Date().getFullYear();
+            // 연말 검색 시 내년 마감일이 올해로 잘못 계산되는 버그 방지
+            const parsed = new Date(year, month - 1, day);
+            if (parsed < new Date()) year++;
+            deadline = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
           } else if (ymMatch) {
             deadline = `${ymMatch[1]}-${ymMatch[2]}-${ymMatch[3]}`;
           } else if (fullText.includes('상시채용') || dateText.includes('상시채용')) {
