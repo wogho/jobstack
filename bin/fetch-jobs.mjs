@@ -29,10 +29,10 @@ if (arg5 && LOCATION_KEYS.includes(arg5.toLowerCase())) {
   location = arg4.toLowerCase();
 }
 
-// 사람인 loc_cd 매핑
+// 사람인 loc_cd 매핑 (가나다 순: 광주<대구<대전<부산<서울...)
 const SARAMIN_LOC_CD = {
-  seoul: '101000', gyeonggi: '102000', gwangju: '103000', daejeon: '104000',
-  daegu: '105000', busan: '106000', ulsan: '107000', incheon: '108000',
+  seoul: '101000', gyeonggi: '102000', gwangju: '103000', daegu: '104000',
+  daejeon: '105000', busan: '106000', ulsan: '107000', incheon: '108000',
 };
 // 한국어 지역명 (키워드 임베딩용)
 const LOCATION_KO = {
@@ -171,9 +171,10 @@ try {
             const month = parseInt(mdMatch[1], 10);
             const day = parseInt(mdMatch[2], 10);
             let year = new Date().getFullYear();
-            // 연말 검색 시 내년 마감일이 올해로 잘못 계산되는 버그 방지
+            // 오늘 자정 기준: 오늘 마감은 올해, 어제 이전만 내년으로 롤오버
+            const today = new Date(); today.setHours(0, 0, 0, 0);
             const parsed = new Date(year, month - 1, day);
-            if (parsed < new Date()) year++;
+            if (parsed < today) year++;
             deadline = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
           } else if (ymMatch) {
             deadline = `${ymMatch[1]}-${ymMatch[2]}-${ymMatch[3]}`;
