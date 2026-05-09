@@ -1,15 +1,16 @@
 #!/usr/bin/env node
 /**
  * Playwright-based job listing fetcher for JS-rendered platforms.
- * Usage: node fetch-jobs.mjs <platform> <keyword> [limit] [career]
+ * Usage: node fetch-jobs.mjs <platform> <keyword> [limit] [career] [location]
  * Platform: jumpit | jobkorea | saramin
  * Career: entry (신입) | experienced (경력) | (생략시 전체)
+ * Location: seoul|gyeonggi|busan|incheon|daejeon|daegu|gwangju|remote (생략시 전체)
  * Outputs JSON array to stdout.
  */
 
 import { chromium } from 'playwright';
 
-const [, , platform, keyword, arg3, arg4] = process.argv;
+const [, , platform, keyword, arg3, arg4, arg5] = process.argv;
 // arg3이 숫자가 아니면 career로 해석 (limit 생략 호출: fetch-jobs.mjs platform keyword entry)
 let limit, career;
 if (arg3 && isNaN(parseInt(arg3, 10))) {
@@ -19,9 +20,28 @@ if (arg3 && isNaN(parseInt(arg3, 10))) {
   limit = parseInt(arg3 || '20', 10);
   career = (arg4 || '').toLowerCase();
 }
+// 지역 필터: 6번째 인수 또는 arg4가 지역 코드인 경우
+const LOCATION_KEYS = ['seoul','gyeonggi','busan','incheon','daejeon','daegu','gwangju','remote'];
+let location = '';
+if (arg5 && LOCATION_KEYS.includes(arg5.toLowerCase())) {
+  location = arg5.toLowerCase();
+} else if (arg4 && LOCATION_KEYS.includes(arg4.toLowerCase())) {
+  location = arg4.toLowerCase();
+}
+
+// 사람인 loc_cd 매핑
+const SARAMIN_LOC_CD = {
+  seoul: '101000', gyeonggi: '102000', gwangju: '103000', daejeon: '104000',
+  daegu: '105000', busan: '106000', ulsan: '107000', incheon: '108000',
+};
+// 한국어 지역명 (키워드 임베딩용)
+const LOCATION_KO = {
+  seoul: '서울', gyeonggi: '경기', busan: '부산', incheon: '인천',
+  daejeon: '대전', daegu: '대구', gwangju: '광주', remote: '재택근무',
+};
 
 if (!platform || !keyword) {
-  process.stderr.write('Usage: fetch-jobs.mjs <platform> <keyword> [limit] [career]\n');
+  process.stderr.write('Usage: fetch-jobs.mjs <platform> <keyword> [limit] [career] [location]\n');
   process.exit(1);
 }
 
@@ -71,6 +91,8 @@ try {
     const jtParams = new URLSearchParams({ sort: 'rsp_rate', keyword });
     if (career === 'entry') { jtParams.set('min_career', '0'); jtParams.set('max_career', '0'); }
     else if (career === 'experienced') { jtParams.set('min_career', '1'); }
+    // 지역 필터: 점핏은 지역명을 키워드에 포함
+    if (location && LOCATION_KO[location]) jtParams.set('keyword', `${keyword} ${LOCATION_KO[location]}`);
     const url = `https://jumpit.saramin.co.kr/search?${jtParams.toString()}`;
     await page.goto(url, { waitUntil: 'commit', timeout: 15000 });
     await page.waitForTimeout(5000);
@@ -119,6 +141,9 @@ try {
     const srKeyword = career === 'entry' ? `${keyword} 신입`
       : career === 'experienced' ? `${keyword} 경력` : keyword;
     const srParams = new URLSearchParams({ searchword: srKeyword, poster_duration: '7', sort: 'RD' });
+    // 지역 필터: loc_cd 파라미터 (서울=101000, 경기=102000, ...)
+    if (location && SARAMIN_LOC_CD[location]) srParams.set('loc_cd', SARAMIN_LOC_CD[location]);
+    if (location === 'remote') srParams.set('searchword', `${srKeyword} 재택`);
     const url = `https://www.saramin.co.kr/zf_user/search?${srParams.toString()}`;
     try {
       const resp = await context.request.get(url, {
@@ -178,8 +203,10 @@ try {
   } else if (platform === 'jobkorea') {
     // jobkorea redesigned with Tailwind CSS — use link-based approach
     // career: 키워드에 신입/경력 추가 (URL 파라미터 대신 키워드 임베딩)
-    const jkKeyword = career === 'entry' ? `${keyword} 신입`
+    // location: 키워드에 지역명 추가
+    let jkKeyword = career === 'entry' ? `${keyword} 신입`
       : career === 'experienced' ? `${keyword} 경력` : keyword;
+    if (location && LOCATION_KO[location]) jkKeyword += ` ${LOCATION_KO[location]}`;
     const jkParams = new URLSearchParams({ stext: jkKeyword, posted: '7', ord: 'RegDate' });
     const url = `https://www.jobkorea.co.kr/Search/?${jkParams.toString()}`;
     try {

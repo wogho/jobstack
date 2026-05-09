@@ -90,6 +90,26 @@ echo "BROWSER_SCRAPER_AVAILABLE=$BROWSER_SCRAPER_AVAILABLE"
 ```
 원티드 API URL에 `&years={N}` 추가. 경력 미지정 시 파라미터 생략.
 
+**희망 지역 → fetch-jobs.mjs location 인수 매핑:**
+- 서울 → `seoul`
+- 경기(판교/수원 등) → `gyeonggi`
+- 부산 → `busan`
+- 인천 → `incheon`
+- 대전 → `daejeon`
+- 대구 → `daegu`
+- 광주 → `gwangju`
+- 원격/재택 → `remote`
+- 미지정 → (생략, 전체 지역)
+
+**원티드 지역 필터 (`locations[]` 파라미터):**
+원티드 API URL에 `&locations%5B%5D={location}` 추가. 예: 서울=`&locations%5B%5D=seoul`.
+원격은 `&locations%5B%5D=anywhere` 사용.
+
+**연봉 필터 처리:**
+- 원티드: 응답 JSON의 `annual_from`/`annual_to` 필드로 수집 후 필터링. (예: 최소 5000만원 → `annual_to >= 5000`)
+- 사람인/잡코리아/점핏: 공고 제목·설명에서 연봉 정보 추출, 명시된 경우에만 필터. 명시 없으면 "연봉 미기재"로 표시.
+- 연봉 필터는 수집 후 AI 필터링 단계에서 처리. fetch-jobs.mjs에는 연봉 파라미터 없음.
+
 ### Phase 2: 채용공고 검색
 
 > ⚠️ **마감 공고 필터링 규칙 (반드시 준수)**
@@ -132,7 +152,17 @@ echo "BROWSER_SCRAPER_AVAILABLE=$BROWSER_SCRAPER_AVAILABLE"
 # 518 = 백엔드  872 = 프론트엔드  669 = 풀스택
 # 655 = DevOps/인프라  660 = 데이터 엔지니어  1 = 전체
 
+# 기본 URL
 https://www.wanted.co.kr/api/v4/jobs?tag_type_ids={CATEGORY_ID}&country=kr&job_sort=job.latest_order&limit=20&offset=0
+
+# 지역 필터 추가 (복수 지정 가능)
+# &locations%5B%5D=seoul          서울
+# &locations%5B%5D=gyeonggi       경기
+# &locations%5B%5D=anywhere       원격/재택
+# 예: 서울 한정 → URL 끝에 &locations%5B%5D=seoul 추가
+
+# 연봉 필터: API에 파라미터 없음 → 응답의 annual_from/annual_to 필드로 수집 후 필터
+# annual_from: 최소 연봉(만원), annual_to: 최대 연봉(만원), null이면 미기재
 ```
 
 **JSON 파싱 규칙:**
@@ -140,6 +170,7 @@ https://www.wanted.co.kr/api/v4/jobs?tag_type_ids={CATEGORY_ID}&country=kr&job_s
 - **due_time이 오늘 이전이면 반드시 제외**
 - `status`: `active`가 아니면 제외
 - `position.name` = 직무명, `company.name` = 회사명
+- `annual_from` / `annual_to`: 연봉 범위 (만원 단위, null이면 미기재)
 
 **⚠️ 훈련 데이터 사용 금지 — ID 범위 검증 필수:**
 API 응답에서 얻은 job ID 목록만 사용하세요. API 목록의 최소 ID와 최대 ID를 기록해두고,
@@ -161,8 +192,10 @@ HTML 페이지(wd/{id})가 아닌 **API detail endpoint**를 사용하세요 —
 
 ```bash
 # career 인수: entry(신입) | experienced(경력) | 생략(전체)
-node "$_JS_BIN/fetch-jobs.mjs" jobkorea "{KEYWORD}" 20 {CAREER} 2>/dev/null
-# 예: node "$_JS_BIN/fetch-jobs.mjs" jobkorea "백엔드" 20 entry 2>/dev/null
+# location 인수: seoul|gyeonggi|busan|incheon|daejeon|daegu|gwangju|remote | 생략(전체)
+node "$_JS_BIN/fetch-jobs.mjs" jobkorea "{KEYWORD}" 20 {CAREER} {LOCATION} 2>/dev/null
+# 예: node "$_JS_BIN/fetch-jobs.mjs" jobkorea "백엔드" 20 entry seoul 2>/dev/null
+# 지역 생략: node "$_JS_BIN/fetch-jobs.mjs" jobkorea "백엔드" 20 entry 2>/dev/null
 ```
 
 **결과 JSON 필드:**
@@ -186,7 +219,9 @@ https://www.jobkorea.co.kr/Search/?stext={URL인코딩된 키워드}&posted=7&or
 
 ```bash
 # career 인수: entry(신입) | experienced(경력) | 생략(전체)
-node "$_JS_BIN/fetch-jobs.mjs" saramin "{KEYWORD}" 20 {CAREER} 2>/dev/null
+# location 인수: seoul|gyeonggi|busan|... | 생략(전체)
+node "$_JS_BIN/fetch-jobs.mjs" saramin "{KEYWORD}" 20 {CAREER} {LOCATION} 2>/dev/null
+# 예: node "$_JS_BIN/fetch-jobs.mjs" saramin "백엔드" 20 entry seoul 2>/dev/null
 ```
 
 결과 JSON: `platform:"saramin"`, `company`, `title`, `deadline`(YYYY-MM-DD 또는 "상시채용"/"채용시마감"), `link`
@@ -200,8 +235,10 @@ node "$_JS_BIN/fetch-jobs.mjs" saramin "{KEYWORD}" 20 {CAREER} 2>/dev/null
 `BROWSER_SCRAPER_AVAILABLE=true` 일 때만 실행합니다:
 
 ```bash
-# $_JS_BIN 은 프리앰블에서 설정됨
-node "$_JS_BIN/fetch-jobs.mjs" jumpit "{KEYWORD}" 20 2>/dev/null
+# career 인수: entry|experienced|생략(전체)
+# location 인수: seoul|gyeonggi|... | 생략(전체)
+node "$_JS_BIN/fetch-jobs.mjs" jumpit "{KEYWORD}" 20 {CAREER} {LOCATION} 2>/dev/null
+# 예: node "$_JS_BIN/fetch-jobs.mjs" jumpit "백엔드" 20 "" seoul 2>/dev/null
 ```
 
 **결과 JSON 필드:**
