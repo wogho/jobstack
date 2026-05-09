@@ -334,3 +334,18 @@ Write로 두 파일을 모두 저장합니다.
 - 자소서 작성 예정이라면 -> `/cover-letter` 추천: "키워드 체크리스트를 바로 활용할 수 있습니다."
 - 이력서 정비가 필요하면 -> `/resume` 추천: "GAP 분석 기반으로 이력서를 조정할 수 있습니다."
 - 면접 준비가 급하면 -> `/mock-interview` 추천: "'이미 팀원처럼' 브리핑을 면접에 바로 활용할 수 있습니다."
+
+## 시각화 이미지 생성 (선택)
+
+기업 분석 결과에서 시각적 요약이 이해에 도움이 되면 응답 끝에 아래 마커를 추가한다:
+
+```
+[IMAGE_PROMPT: <영어 프롬프트>]
+```
+
+**사용 기준:**
+- 기업 핵심 가치/문화/강점을 시각화한 인포그래픽, 직무 요구 역량 다이어그램 → 사용
+- 단순 텍스트 요약, 오류 메시지 → 사용하지 않음
+
+**프롬프트 스타일:** professional infographic/diagram 스타일.
+예: `A professional company overview infographic for Kakao Corp: key values (connection, innovation, growth), tech stack (Go, Python, Kubernetes), team culture (flexible, hybrid), key products. Clean modern design, blue/yellow brand colors.`
