@@ -28,10 +28,14 @@ if [ -f "$PROFILE" ]; then echo "PROFILE_EXISTS=true"; head -20 "$PROFILE"; else
 echo "{\"skill\":\"job-search\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\":$$}" >> "$_JS_STATE/analytics/skill-usage.jsonl" 2>/dev/null || true
 
 # ─── Playwright 브라우저 스크래퍼 초기화 ─────────────
-# CLAUDE_SKILL_DIR 가 비어있는 환경(Docker 등)을 위해 알려진 경로도 탐색
+# CLAUDE_SKILL_DIR 기반 경로를 우선 시도하되, fetch-jobs.mjs 존재 여부를 검증.
+# 컨테이너에서는 SKILL.md가 ~/.claude/commands/job-search/에 복사되어
+# CLAUDE_SKILL_DIR/../bin 이 실제 bin 위치(/app/skills/jobstack/bin)와 다름.
+# → 경로가 틀렸으면 알려진 절대경로로 fallback.
 if [ -n "$CLAUDE_SKILL_DIR" ]; then
   _JS_BIN="${CLAUDE_SKILL_DIR}/../bin"
-else
+fi
+if [ ! -f "${_JS_BIN:-}/fetch-jobs.mjs" ]; then
   for _try in "/app/skills/jobstack/bin" "$HOME/.claude/skills/jobstack/bin" "/var/jobclaw/skills/jobstack/bin"; do
     [ -f "$_try/fetch-jobs.mjs" ] && { _JS_BIN="$_try"; break; }
   done
