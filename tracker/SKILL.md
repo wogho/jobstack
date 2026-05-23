@@ -20,6 +20,7 @@ mkdir -p "$_JS_STATE/analytics" "$_JS_STATE/profiles" "$_JS_STATE/tracker" \
 
 # 세션 추적
 echo "$$" > "$_JS_STATE/sessions/$$"
+trap 'rm -f "$_JS_STATE/sessions/$$"' EXIT
 
 # 설정 로딩
 _JS_CONFIG="${CLAUDE_SKILL_DIR}/../bin/jobstack-config"
@@ -41,6 +42,10 @@ if [ "$ENTRY_COUNT" -gt 0 ]; then
 fi
 
 # 활성 세션 수
+for _f in "$_JS_STATE/sessions/"* 2>/dev/null; do
+  [ -f "$_f" ] || continue
+  kill -0 "$(basename "$_f")" 2>/dev/null || rm -f "$_f"
+done
 ACTIVE_SESSIONS=$(ls "$_JS_STATE/sessions/" 2>/dev/null | wc -l | tr -d ' ')
 echo "ACTIVE_SESSIONS=$ACTIVE_SESSIONS"
 echo "PROACTIVE=$PROACTIVE"
