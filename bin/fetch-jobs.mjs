@@ -2,7 +2,7 @@
 /**
  * Playwright-based job listing fetcher for JS-rendered platforms.
  * Usage: node fetch-jobs.mjs <platform> <keyword> [limit] [career] [location]
- * Platform: jumpit | jobkorea | saramin
+ * Platform: jumpit | jobkorea | saramin | wanted
  * Career: entry (신입) | experienced (경력) | (생략시 전체)
  * Location: seoul|gyeonggi|busan|incheon|daejeon|daegu|gwangju|remote (생략시 전체)
  * Outputs JSON array to stdout.
@@ -45,7 +45,7 @@ if (!platform || !keyword) {
   process.exit(1);
 }
 
-const PLATFORMS = ['jumpit', 'programmers', 'jobkorea', 'saramin'];
+const PLATFORMS = ['jumpit', 'programmers', 'jobkorea', 'saramin', 'wanted'];
 if (!PLATFORMS.includes(platform)) {
   process.stderr.write(`Unknown platform: ${platform}. Supported: ${PLATFORMS.join(', ')}\n`);
   process.exit(1);
@@ -98,6 +98,7 @@ try {
     await page.waitForTimeout(5000);
 
     jobs = await page.evaluate((lim) => {
+      const NOISE_RE = /D-\d|마감|상시|경력|신입|원격|재택|\d+년/;
       const links = Array.from(document.querySelectorAll('a[href*="/position/"]'));
       return links.slice(0, lim).map(a => {
         const rawTitle = a.getAttribute('title') || '';
@@ -109,7 +110,13 @@ try {
         if (dLine === 'D-day') deadline = '오늘 마감!';
         else if (dLine.startsWith('D-')) deadline = `${dLine.replace('D-', '')}일 후 마감`;
         else if (dLine === '상시채용') deadline = '상시채용';
-        return { platform: 'jumpit', company, title, deadline, dRemaining: dLine, link: a.href };
+        const LOCATION_RE = /[시구군동로]\s*\d*$|^서울|^경기|^부산|^인천|^대전|^대구|^광주/;
+        const tagEls = Array.from(a.querySelectorAll('[class*="tag"] span, [class*="skill"] span, ul li, [class*="chip"]'));
+        const skills = tagEls
+          .map(el => el.innerText.replace(/^·\s*/, '').trim())
+          .filter(s => s && s.length > 0 && s.length < 30 && !NOISE_RE.test(s) && !LOCATION_RE.test(s))
+          .slice(0, 8).join(', ');
+        return { platform: 'jumpit', company, title, deadline, dRemaining: dLine, link: a.href, skills };
       }).filter(j => j.title && j.company);
     }, limit);
 
@@ -184,6 +191,10 @@ try {
             deadline = '채용시마감';
           }
 
+          // 사람인 list page는 기술태그를 노출하지 않음.
+          // .job_sector는 날짜/등록일 텍스트 → 빈 문자열 반환.
+          const skills = '';
+
           // setContent로 로드된 경우 절대 URL로 복원
           const href = titleEl?.getAttribute('href') || '';
           const link = href.startsWith('http') ? href : `https://www.saramin.co.kr${href}`;
@@ -194,11 +205,120 @@ try {
             deadline,
             dRemaining: '',
             link,
+            skills,
           };
         }).filter(j => j.title && j.company);
       }, limit);
     } catch (err) {
       process.stderr.write(`saramin scrape error: ${err.message}\n`);
+    }
+
+  } else if (platform === 'wanted') {
+    // career → 키워드 임베딩 (jobkorea/saramin과 일관).
+    // years 파라미터는 연차 단위로 추정되어 experienced일 때 생략 — 1년차만 잡히는 누락 방지.
+    let wKeyword = career === 'entry' ? `${keyword} 신입`
+      : career === 'experienced' ? `${keyword} 경력` : keyword;
+    if (location && LOCATION_KO[location]) wKeyword += ` ${LOCATION_KO[location]}`;
+    const wParams = new URLSearchParams({ query: wKeyword, tab: 'position' });
+    if (career === 'entry') wParams.set('years', '0'); // 신입만 명시
+    const url = `https://www.wanted.co.kr/search?${wParams.toString()}`;
+
+    try {
+      // 원티드 SPA 트래커가 계속 폴링해 networkidle 도달이 어려움 → domcontentloaded + 카드 셀렉터 대기.
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 25000 });
+      // state: 'attached' — Wanted 카드는 viewport 밖 lazy-render라 기본값 'visible'은 timeout.
+      // try-catch — 검색 결과 0건이면 카드가 안 나타나므로 정상 케이스로 처리, 5초 단축.
+      try {
+        await page.waitForSelector('a[href*="/wd/"]', { state: 'attached', timeout: 5000 });
+      } catch {
+        // 0건 — 무한스크롤/추출 단계로 진행하면 빈 배열 반환.
+      }
+
+      // 무한스크롤 — scrollHeight 변화 없으면 조기 종료 (최대 5회).
+      // 카드가 아예 없으면 (0건 케이스) 스크롤 건너뜀.
+      await page.evaluate(async () => {
+        if (document.querySelectorAll('a[href*="/wd/"]').length === 0) return;
+        let prevHeight = 0;
+        let stableCount = 0;
+        for (let i = 0; i < 5; i++) {
+          window.scrollTo(0, document.body.scrollHeight);
+          await new Promise(r => setTimeout(r, 800));
+          const h = document.body.scrollHeight;
+          if (h === prevHeight) {
+            if (++stableCount >= 2) break;
+          } else {
+            stableCount = 0;
+            prevHeight = h;
+          }
+        }
+      });
+
+      jobs = await page.evaluate(({ lim, careerArg }) => {
+        const seen = new Set();
+        const results = [];
+
+        // 검색 결과 카드만 — data-position-id가 있는 a 태그가 정상 카드.
+        // Wanted SPA는 트래킹용으로 data-position-name / data-company-name 등을 카드에 심어놓음.
+        // 추천/사이드바 등의 anchor는 이 attribute가 없어 자연스럽게 제외됨.
+        const root = document.querySelector('main') || document;
+        const cards = Array.from(root.querySelectorAll('a[href*="/wd/"][data-position-id]'));
+
+        for (const card of cards) {
+          const id = card.getAttribute('data-position-id');
+          if (!id || seen.has(id)) continue;
+          seen.add(id);
+
+          const title = (card.getAttribute('data-position-name') || '').trim();
+          const company = (card.getAttribute('data-company-name') || '').trim();
+          if (!title || !company) continue;
+
+          const fullText = (card.innerText || '').trim();
+
+          // career 필터 — Wanted 검색 URL의 years 파라미터는 SPA가 무시하므로 카드 텍스트 매칭이 가장 정확.
+          // 카드 텍스트 예: "...경력 5-12년합격보상금 100만원" / "...신입-경력 3년..."
+          if (careerArg === 'entry') {
+            if (!/신입/.test(fullText)) continue;
+          } else if (careerArg === 'experienced') {
+            // '경력 N-M년' 또는 '경력 N년' — N >= 1이면 experienced 대상.
+            const em = fullText.match(/경력\s*(\d+)/);
+            if (!em || parseInt(em[1], 10) < 1) continue;
+          }
+
+          // 마감일 추출 — D-day / D-N / 상시채용 / 채용시 라벨 탐색, 없으면 미확인 폴백.
+          let deadline = '마감일 미확인';
+          if (/D-?day|오늘\s?마감/.test(fullText)) {
+            deadline = '오늘 마감!';
+          } else {
+            const dMatch = fullText.match(/D-(\d+)/);
+            if (dMatch) deadline = `${dMatch[1]}일 후 마감`;
+            else if (fullText.includes('상시채용')) deadline = '상시채용';
+            else if (fullText.includes('채용시')) deadline = '채용시마감';
+          }
+
+          const tagEls = Array.from(
+            card.querySelectorAll('[class*="tag"] span, [class*="skill"] span, [class*="badge"] span, [class*="chip"] span')
+          ).filter(el => {
+            const t = el.innerText.trim();
+            return t && t.length > 0 && t.length < 30 && !/D-\d|마감|상시|경력|신입|\d+년/.test(t);
+          });
+          const skills = tagEls.map(el => el.innerText.trim()).slice(0, 8).join(', ');
+
+          results.push({
+            platform: 'wanted',
+            company,
+            title,
+            deadline,
+            dRemaining: '',
+            link: `https://www.wanted.co.kr/wd/${id}`,
+            skills,
+          });
+
+          if (results.length >= lim) break;
+        }
+        return results;
+      }, { lim: limit, careerArg: career });
+    } catch (err) {
+      process.stderr.write(`wanted scrape error: ${err.message}\n`);
     }
 
   } else if (platform === 'jobkorea') {
@@ -261,6 +381,12 @@ try {
             : fullText.includes('채용시') ? '채용시마감'
             : '마감일 미확인';
 
+          const tagEls = card?.querySelectorAll('[class*="tag"] span, [class*="chip"] span, [class*="skill"] span, [class*="badge"] span') || [];
+          const skills = Array.from(tagEls)
+            .map(el => el.innerText.trim())
+            .filter(s => s && s.length > 0 && s.length < 30 && !/마감|채용|모집/.test(s))
+            .slice(0, 8).join(', ');
+
           results.push({
             platform: 'jobkorea',
             company: companyText,
@@ -268,6 +394,7 @@ try {
             deadline,
             dRemaining: '',
             link: baseHref,
+            skills,
           });
 
           if (results.length >= lim) break;
