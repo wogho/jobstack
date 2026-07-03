@@ -1,5 +1,41 @@
 # Changelog
 
+## [0.3.0] - 2026-07-04
+
+tea-agent(헤르메스) 지식 자산 + 2026 채용시장 트렌드 분석 기반 전면 업그레이드.
+멀티에이전트 분석 4라운드 → 계획서(`docs/plans/skill-upgrade-plan-2026-07.md`) →
+M1 인프라 → M2~M5 스킬 업그레이드 순으로 진행. Council #1(4자 에이전트 투표)로
+오너 결정 7건 확정.
+
+### Added
+- **신규 스킬 3개**
+  - `experience-bank` (tier 2) — 경험 소재 발굴·카드화. `experiences.yaml`에 append,
+    resume/cover-letter/mock-interview의 입력 자산
+  - `career-history` (tier 3) — 경력기술서 작성/첨삭, 이력서-경력기술서-자소서 역할 구분
+  - `scout-profile` (tier 3) — 링크드인/원티드/리멤버 프로필 첨삭
+- **공유 인프라 (M1)**
+  - `templates/guardrails.md` — 사실 날조·PII 금지, 한계 노출→자료 요청 전환,
+    시장 수치 하드코딩 금지, KST 날짜, 금지 표현 (13개 스킬이 프리앰블 직후 Read)
+  - `templates/experience-methods.md` — 경험 전환 6단계·수치 폴백 5기준·전환표 등
+  - `templates/humanize-check.md` — 치환 테스트 2종·AI풍 신호 진단
+  - `templates/three-docs-guide.md` — 3문서 역할 구분 공유 블록
+  - `docs/tracker-states.md` — canonical 9상태 모델 (저장=영문 키, 표시=한글 라벨,
+    `max_stage` 퍼널 필드, v1 하위호환 정규화)
+  - `docs/defense-map-schema.md` + `templates/defense-map-example.yaml` — 문장↔꼬리질문 맵 계약
+  - `docs/telemetry-events.md` — 스킬 사용 이벤트 규격 (로컬 파일 한정)
+  - `bin/jobstack-export` — pandoc md→docx 변환 (ATS-safe, Noto Sans KR)
+  - `test/lint-conventions.sh` — AI 만능 표현·금지 표현·시장 수치 하드코딩 린트
+
+### Changed
+- **13개 스킬 P0~P2 업그레이드** (auto v0.2, strategy v0.2, tracker v0.2,
+  company-research v0.3, portfolio v0.2, job-search v0.5, ncs v0.2, salary v0.2,
+  resume v0.2, cover-letter v0.2, mock-interview v0.2, retro v0.2, review v0.2)
+  - 공채 중심 전제 → 수시 중심으로 교정, 중고신입·경력전환 트랙 추가
+  - 시장 수치를 본문 하드코딩 대신 WebSearch 동적 확인 규칙으로 전환
+  - 사실 날조·PII 가드레일 연결, 공고 미확보 시 점수 산출 게이트
+  - 방법론을 templates/ 공유 참조로 단일화 (중복 제거)
+- CLAUDE.md tier 표 16개 스킬로 갱신, install.sh·통합 테스트 스킬 목록 확장
+
 ## [0.2.0] - 2026-07-03
 
 ### Fixed

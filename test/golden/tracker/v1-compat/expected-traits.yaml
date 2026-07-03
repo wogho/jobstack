@@ -1,0 +1,27 @@
+# tracker v1 하위호환 골든 케이스 (결정적)
+# 입력: input.jsonl (v1 한글 status)
+# 목적: docs/tracker-states.md 매핑표가 입력의 모든 v1 status를 커버하는지 검증.
+#       상태를 추가/개명할 때 매핑 누락으로 하위호환이 깨지는 것을 CI에서 잡는다.
+
+# run-golden.sh가 결정적으로 자동 판정하는 부분:
+#   input.jsonl의 각 status 값이 아래 매핑에 존재하고,
+#   그 매핑이 docs/tracker-states.md의 v1→v2 매핑표와 일치하는지.
+v1_to_v2_mapping:
+  서류전형: applied
+  준비중: preparing
+  1차면접: interview_1
+  최종합격: offer
+  불합격: rejected
+
+# 스킬 실행 산출물(list)에 대한 trait 판정 (반수동 — 사람이 확인):
+list_output_traits:
+  must_contain:
+    - "진행중"        # 그룹 헤더 (interview_1 = 토스)
+    - "대기중"        # 그룹 헤더 (preparing/applied = 카카오/네이버)
+    - "종료"          # 그룹 헤더 (offer/rejected = 라인/당근)
+  must_not_contain:
+    - "다각적"        # AI 만능 표현
+    - "합격 보장"     # 금지 표현
+  structure:
+    - "합격률 분모에서 withdrawn 제외 (이 입력엔 withdrawn 없음)"
+    - "표시는 한글 라벨, 내부 status는 영문 키로 정규화"
