@@ -26,14 +26,14 @@ flowchart TB
 
     Scan --> |"파일 없음"| Strategy["/strategy<br/>취업전략 수립"]:::tier1
     Scan --> |"이력서 감지"| Resume["/resume<br/>이력서 첨삭"]:::tier3
-    Scan --> |"자소서 감지"| CoverLetter["/cover-letter<br/>자소서 첨삭"]:::tier3
-    Scan --> |"채용공고 감지"| CompanyResearch["/company-research<br/>기업분석"]:::tier2
+    Scan --> |"자소서 감지"| CoverLetter["/cover_letter<br/>자소서 첨삭"]:::tier3
+    Scan --> |"채용공고 감지"| CompanyResearch["/company_research<br/>기업분석"]:::tier2
     Scan --> |"포트폴리오 감지"| Portfolio["/portfolio<br/>포트폴리오 리뷰"]:::tier2
 
     Strategy --> |"프로필 생성"| Profile[(프로필)]
     Profile --> CompanyResearch
-    Profile --> JobSearch["/job-search<br/>채용정보 탐색"]:::tier2
-    Profile --> NCS["/ncs<br/>NCS 역량 매핑"]:::tier2
+    Profile --> JobSearch["/job_search<br/>채용정보 탐색"]:::tier2
+    Profile --> NCS["NCS 역량 매핑<br/>(공기업: /cover_letter 보강)"]:::tier2
 
     CompanyResearch --> Resume
     CompanyResearch --> CoverLetter
@@ -44,8 +44,8 @@ flowchart TB
     CoverLetter --> Review
     Portfolio --> Review
 
-    Review --> |"서류 통과"| MockInterview["/mock-interview<br/>모의면접"]:::tier4
-    Review --> Tracker["/tracker<br/>지원 현황 관리"]:::tier1
+    Review --> |"서류 통과"| MockInterview["/mock_interview<br/>모의면접"]:::tier4
+    Review --> Tracker["/track · /myapps<br/>지원 현황 관리"]:::tier1
 
     MockInterview --> |"인성면접"| MI1["인성면접<br/>시뮬레이션"]
     MockInterview --> |"PT면접"| MI2["PT면접<br/>연습"]
@@ -69,11 +69,11 @@ flowchart TB
 
 ```mermaid
 graph LR
-    A["1단계<br/>전략 수립<br/>/strategy"]:::s1 --> B["2단계<br/>기업분석 + NCS<br/>/company-research<br/>/ncs"]:::s2
-    B --> C["3단계<br/>서류 작성<br/>/resume<br/>/cover-letter"]:::s3
+    A["1단계<br/>전략 수립<br/>/strategy"]:::s1 --> B["2단계<br/>기업분석<br/>/company_research"]:::s2
+    B --> C["3단계<br/>서류 작성<br/>/resume<br/>/cover_letter"]:::s3
     C --> D["4단계<br/>통합 리뷰<br/>/review"]:::s4
-    D --> E["5단계<br/>면접 준비<br/>/mock-interview"]:::s5
-    E --> F["6단계<br/>지원/추적<br/>/tracker"]:::s6
+    D --> E["5단계<br/>면접 준비<br/>/mock_interview"]:::s5
+    E --> F["6단계<br/>지원/추적<br/>/track · /myapps"]:::s6
     F --> G["7단계<br/>회고/개선<br/>/retro"]:::s7
     G -.-> |"피드백 루프"| A
 
@@ -123,17 +123,20 @@ jobstack-view 기업분석-삼성전자.md  # 스타일링된 HTML로 변환
 |------|------|------|
 | `/auto` | 파일 자동 감지 + 단계별 가이드 (진입점) | 1 |
 | `/strategy` | 역량 진단 + 취업전략 + 로드맵 생성 | 1 |
-| `/tracker` | 지원 현황 추적 + 일정 관리 | 1 |
-| `/company-research` | 7가지 키워드 소스 기업분석 + 적합도 스코어링 | 2 |
-| `/job-search` | 사람인/잡코리아/원티드 채용공고 탐색 | 2 |
-| `/ncs` | NCS 역량 매핑 + 경험→역량 변환 | 2 |
+| `tracker/` (CLI 전용) | 지원 현황 추적 + 일정 관리 — 봇에서는 네이티브 `/track`·`/myapps` | 1 |
+| `/company_research` | 7가지 키워드 소스 기업분석 + 적합도 스코어링 | 2 |
+| `/job_search` | 사람인/잡코리아/원티드 채용공고 탐색 | 2 |
+| `ncs/` (CLI 전용) | NCS 역량 매핑 + 경험→역량 변환 — 봇에서는 `/cover_letter`의 공기업 NCS 보강 | 2 |
 | `/salary` | 연봉 벤치마크 + 협상 전략 | 2 |
 | `/portfolio` | 포트폴리오 최적화 + 임팩트 표현 | 2 |
 | `/retro` | 면접 회고 + 탈락 원인 분석 + 개선 | 2 |
 | `/resume` | 이력서 작성/첨삭 + ATS 최적화 | 3 |
-| `/cover-letter` | 자소서 작성/첨삭 ("결이요" + 5단계 첨삭) | 3 |
-| `/mock-interview` | 모의면접 5가지 모드 (인성/PT/토론/AI/기술) | 4 |
+| `/cover_letter` | 자소서 작성/첨삭 ("결이요" + 5단계 첨삭) | 3 |
+| `/mock_interview` | 모의면접 5가지 모드 (인성/PT/토론/AI/기술) | 4 |
 | `/review` | 이력서↔자소서↔포트폴리오 통합 점검 | 4 |
+
+> 명령 표기는 Telegram 봇 노출 기준(언더스코어)입니다. 스킬 디렉토리명은 하이픈을
+> 유지합니다 (예: `company-research/`, `cover-letter/`, `mock-interview/`, `job-search/`).
 
 ---
 
@@ -233,11 +236,11 @@ flowchart LR
 
     S1["/auto<br/>3건 감지<br/>프로필 생성"]
     S2["/strategy<br/>GAP 분석<br/>12주 로드맵"]
-    S3["/company-research<br/>키워드 14%<br/>적합도 58점"]
+    S3["/company_research<br/>키워드 14%<br/>적합도 58점"]
     S4["/resume<br/>ATS 53%<br/>수치화 6건"]
-    S5["/cover-letter<br/>38점→결이요<br/>미끼 5개"]
+    S5["/cover_letter<br/>38점→결이요<br/>미끼 5개"]
     S6["/review<br/>체크 12/20<br/>질문 32개"]
-    S7["/mock-interview<br/>인성 5문<br/>66/100점"]
+    S7["/mock_interview<br/>인성 5문<br/>66/100점"]
     S8["/retro<br/>회고+액션플랜"]
 
     입력 --> S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8
@@ -253,12 +256,12 @@ flowchart LR
 |------|------|------|----------|------|
 | 1 | `/auto` | 폴더 파일 3건 | [대시보드](docs/e2e-output/step1-auto-대시보드.md) — 감지 결과 + 체크리스트 | 2.6KB |
 | 2 | `/strategy` | 이력서 → 프로필 추출 | [프로필](docs/e2e-output/step2-strategy-프로필.yaml) + [로드맵](docs/e2e-output/step2-strategy-로드맵.md) | 8.5KB |
-| 3 | `/company-research` | 채용공고 + WebSearch | [네이버 기업분석](docs/e2e-output/step3-company-research-네이버.md) — 키워드 반영률 14% | 9.8KB |
+| 3 | `/company_research` | 채용공고 + WebSearch | [네이버 기업분석](docs/e2e-output/step3-company-research-네이버.md) — 키워드 반영률 14% | 9.8KB |
 | 4 | `/resume` | 이력서 + 채용공고 | [이력서 첨삭](docs/e2e-output/step4-resume-첨삭결과.md) — 수치화 before/after 6건 | 13KB |
-| 5 | `/cover-letter` | 자소서 + 기업분석 | [자소서 5단계 첨삭](docs/e2e-output/step5-cover-letter-첨삭결과.md) — 진단 38점, 미끼 5개 | **25.6KB** |
+| 5 | `/cover_letter` | 자소서 + 기업분석 | [자소서 5단계 첨삭](docs/e2e-output/step5-cover-letter-첨삭결과.md) — 진단 38점, 미끼 5개 | **25.6KB** |
 | 6 | `/review` | 이력서+자소서+채용공고 | [통합 점검](docs/e2e-output/step6-review-통합점검.md) — 면접 질문 32개 | 13.4KB |
-| 7 | `/mock-interview` | 자소서 미끼 + 프로필 | [인성면접 5문](docs/e2e-output/step7-mock-interview-인성면접.md) — 66/100점 | 18.5KB |
-| 8 | `/tracker` + `/retro` | 면접 결과 | [현황](docs/e2e-output/step8-tracker-현황.md) + [회고](docs/e2e-output/step8-retro-회고.md) | 11.5KB |
+| 7 | `/mock_interview` | 자소서 미끼 + 프로필 | [인성면접 5문](docs/e2e-output/step7-mock-interview-인성면접.md) — 66/100점 | 18.5KB |
+| 8 | `tracker/` + `/retro` | 면접 결과 | [현황](docs/e2e-output/step8-tracker-현황.md) + [회고](docs/e2e-output/step8-retro-회고.md) | 11.5KB |
 | | | | **총 출력** | **103KB** |
 
 ### 자소서 변환 추적 (Before → After)
