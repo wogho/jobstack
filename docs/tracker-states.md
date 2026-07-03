@@ -4,6 +4,7 @@
 
 - 확정 근거: Council #1 (2026-07-03) — watching 미포함(3:1), preparing 유지(4:0), 마이그레이션은 읽기 정규화+승인 재작성(4:0), withdrawn 라벨 "지원취소"(4:0)
 - 원칙: **저장은 영문 키, 표시는 한글 라벨**
+- **작업 범위 경계**: M1(INFRA-5)은 이 canonical 정의 문서 확정까지다. `tracker/SKILL.md`의 add/update 선택지·JSONL 예시·stats 분포를 이 모델로 실제 교체하는 편집과 `retro`/`auto`의 소비 배선은 **TRK-1(M4)** 작업이다. 그 사이 tracker/SKILL.md 본문은 구버전(v1) 예시를 유지하되 상단 경고로 이 문서를 기준으로 가리킨다.
 
 ---
 
@@ -50,12 +51,14 @@
 ## 저장 스키마 v2
 
 ```json
-{"id":"app-001","company":"삼성전자","position":"SW엔지니어","status":"applied","schema_version":2,"applied_at":"2026-07-01","deadline":"2026-07-15","updated_at":"2026-07-03","notes":""}
+{"id":"app-001","company":"삼성전자","position":"SW엔지니어","status":"applied","max_stage":"applied","schema_version":2,"applied_at":"2026-07-01","deadline":"2026-07-15","updated_at":"2026-07-03","notes":""}
 ```
 
 - **쓰기**: 항상 영문 키 + `"schema_version":2` 필드 포함
 - **읽기**: `status`가 한글이면 위 매핑표로 정규화 (v1 하위호환 — 구버전 파일도 오류 없이 동작)
 - **표시**: 사용자 출력은 항상 한글 라벨
+- **`max_stage`** (파이프라인 최고 도달 단계): 상태를 갱신할 때마다 파이프라인 순서(preparing<applied<document_pass<interview_1<interview_2<final<offer)상 더 높은 단계면 갱신한다. 종결(rejected/withdrawn) 전환 시에는 `status`만 종결 값으로 바꾸고 `max_stage`는 직전 진행 단계를 보존한다 — 이 필드가 있어야 "면접 중 탈락"을 퍼널에서 복원할 수 있다. rejected/withdrawn은 파이프라인 단계가 아니므로 `max_stage`에 절대 기록하지 않는다.
+- v1 파일이나 `max_stage`가 없는 항목을 읽을 때: 진행 상태면 현재 `status`를, 종결 상태면 `applied`(최소 도달)를 폴백값으로 간주하되, 폴백 사실을 집계에 반영해 상향 왜곡을 피한다(아래 퍼널 규칙 참조).
 
 ---
 
@@ -78,8 +81,13 @@
 
 ## 넛지·집계 규칙 (소비 스킬 공통 기준)
 
-- **7일 정체 넛지**: `updated_at` 기준 7일 이상 경과한 진행 상태(preparing~final) 항목이 대상. 종결 상태(offer/rejected/withdrawn)는 제외.
-- **퍼널 전환율** (retro 집계): 영문 키 기준 — 서류 통과율 = document_pass 이상 도달 건 / applied 이상 도달 건, 면접 통과율 = offer / interview_1 이상 도달 건.
+- **7일 정체 넛지**:
+  - jobclaw 봇 넛지는 `applied` 상태 한정(검증된 application-reminder-cron 설계와 일치).
+  - CLI(tracker/auto)의 정체 감지는 `updated_at` 기준 7일 이상 경과한 진행 상태(preparing~final) 전체를 대상으로 확장한다 — 봇보다 넓은 범위임을 의도적으로 명시. 종결 상태(offer/rejected/withdrawn)는 양쪽 모두 제외.
+- **퍼널 전환율** (retro 집계): `max_stage`(최고 도달 단계) 기준으로 계산한다. "X 이상 도달" = `max_stage`가 파이프라인 순서상 X 이상인 건.
+  - 서류 통과율 = (`max_stage` ≥ document_pass 인 건) / (`max_stage` ≥ applied 인 건)
+  - 면접 통과율 = (`status` = offer 인 건) / (`max_stage` ≥ interview_1 인 건)
+  - `max_stage`가 없는 v1/폴백 항목은 종결 상태를 어느 단계에서 마쳤는지 알 수 없으므로 분자·분모 판정이 불확실하다 — 이런 항목 수를 별도로 세어 "정확도 제한: 구버전 N건 제외" 형태로 함께 표기한다(상향 왜곡 방지).
 - **합격률 분모에서 withdrawn 제외** — 사용자가 접은 지원은 탈락이 아니다.
 - 표본이 작을 때(그룹당 3건 미만) 비교 수치를 단정 서술하지 않는다.
 

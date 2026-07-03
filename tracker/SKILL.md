@@ -63,6 +63,8 @@ echo "{\"skill\":\"tracker\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\":$
 
 사용자의 취업 지원 현황을 추적하고 관리합니다.
 
+> ⚠️ **상태 모델 개정 예정 (TRK-1)**: 아래 예시의 상태값(한글 "서류전형" 등)은 구버전(v1)입니다. canonical 상태 정의는 `docs/tracker-states.md`(9상태, 저장=영문 키·표시=한글 라벨, `schema_version:2`, `max_stage` 필드)이며, add/update 선택지·JSONL 예시·stats 분포는 TRK-1 작업에서 전면 개정됩니다. 그 전까지 새 기록을 만들 때도 `docs/tracker-states.md`의 영문 키·매핑표를 기준으로 삼고, 한글 status가 든 기존 파일은 읽기 시 정규화하세요(강제 재작성 금지).
+
 ---
 
 ## 명령 감지
