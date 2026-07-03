@@ -285,6 +285,7 @@ flowchart LR
 - **100% Markdown 스킬** — 코드 없이 프롬프트만으로 동작
 - **YAML 프론트매터** — 스킬 메타데이터 정의
 - **파일 기반 상태관리** — `~/.jobstack/`에 YAML/JSONL
+- **로컬 사용 기록** — 스킬 사용 이벤트가 `~/.jobstack/analytics/`에 로컬 파일로만 기록됩니다 (네트워크 전송 없음, 문서 내용·개인정보 미포함 — [규격](docs/telemetry-events.md))
 - **Zero 의존성** — bash만 있으면 설치/실행 가능
 - **스킬 체이닝** — `benefits-from`으로 스킬 간 의존성 정의
 
