@@ -97,7 +97,7 @@ tea-agent가 축적한 지식 자산과 2026년 채용시장 트렌드를 대조
 
 | 마일스톤 | 내용 | 규모 | 추정 |
 |---|---|---|---|
-| **M1 공유 인프라** | INFRA-1(guardrails)·2(experience-methods)·4(preamble 템플릿 역반영)·5(tracker 상태 모델)·6(jobstack-export) [P0] + INFRA-3(humanize-check)·7(컨벤션 린트)·9(defense-map)·10(텔레메트리) [P1] + 오너 결정 7건 ✅확정(Council #1) | 인프라 9건 | 1.5~2일 |
+| **M1 공유 인프라** ✅**완료(2026-07-04)** | INFRA-1~10 전건 구현 — guardrails/experience-methods/humanize-check 템플릿, preamble canonical, tracker 9상태 모델, jobstack-export(Noto Sans KR), 컨벤션 린트, defense-map 계약, 텔레메트리. 오너 결정 7건 확정(Council #1). 2라운드 적대적 검증(18 에이전트, major 2+minor 8) 전건 수정. 게이트 4종 GREEN. 7커밋 | 인프라 10건 | 완료 |
 | **M2 P0 웨이브** | 13개 스킬의 P0 28건 — 날조·PII 가드레일 연결, 낡은 전제 교정(공채·ATS·검색 소스), 점수 산출 게이트, 한계 노출→자료 요청 전환 | 28건 (S 위주) | 1.5~2일 |
 | **M3 experience-bank** | 신규 스킬 v0.1.0 + 소비 배선(resume/cover-letter/mock-interview benefits-from + cover-letter Phase 2 카드 우선 제시) + test-preambles.sh SKILLS 목록 갱신 | 신규 1 + 배선 | 0.5~1일 |
 | **M4 P1 웨이브 + career-history** | 스킬 P1 52건(defense-map 산출·소비, 2차 점검 루프, 중고신입 트랙, 모드 확장 등) + career-history v0.1.0 + templates/three-docs-guide.md | 52건 + 신규 1 | 2.5~3일 |
