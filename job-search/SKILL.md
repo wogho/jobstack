@@ -355,10 +355,10 @@ site:jobkorea.co.kr "{직무}" 채용
 
 #### 검색 완료 텔레메트리
 
-Phase 2 검색이 끝나면 후속 이벤트 1줄을 `$_JS_STATE/analytics/skill-usage.jsonl`에 append합니다. 검색 실패(0건)도 기록해 fallback UX 발동 빈도를 retro에서 집계할 수 있게 합니다. (프리앰블 append 관례와 동일 — 실패해도 스킬 동작에 영향이 없어야 합니다.)
+Phase 2 검색이 끝나면 `detected` 이벤트 1줄을 `$_JS_STATE/analytics/skill-usage.jsonl`에 append합니다. `docs/telemetry-events.md` 규격의 메타 필드만 씁니다 — 검색값(직무·경력·지역)·수집건수·캐시 여부 같은 사용자 값이나 미정의 필드는 기록하지 않습니다(PII 금지·규격 이원화 방지). 검색 완료는 `mode:"search"`로만 구분합니다. (프리앰블 append 관례와 동일 — 실패해도 스킬 동작에 영향이 없어야 합니다.)
 
 ```bash
-echo '{"skill":"job-search","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","pid":'$$',"event":"detected","combo":"직무/경력/지역","results":수집건수,"cache_hit":true|false}' \
+echo '{"skill":"job-search","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","pid":'$$',"event":"detected","phase":"phase-2","mode":"search"}' \
   >> "$_JS_STATE/analytics/skill-usage.jsonl" 2>/dev/null || true
 ```
 

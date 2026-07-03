@@ -128,12 +128,15 @@ jobstack-view 기업분석-삼성전자.md  # 스타일링된 HTML로 변환
 | `/job_search` | 사람인/잡코리아/원티드 채용공고 탐색 | 2 |
 | `ncs/` (CLI 전용) | NCS 역량 매핑 + 경험→역량 변환 — 봇에서는 `/cover_letter`의 공기업 NCS 보강 | 2 |
 | `/salary` | 연봉 벤치마크 + 협상 전략 | 2 |
-| `/portfolio` | 포트폴리오 최적화 + 임팩트 표현 | 2 |
+| `/portfolio` | 포트폴리오 최적화 + 임팩트 표현 (GitHub 레포·README) | 2 |
 | `/retro` | 면접 회고 + 탈락 원인 분석 + 개선 | 2 |
+| `/experience_bank` | 경험 소재 발굴·카드화 (자소서·이력서 소재 은행) | 2 |
 | `/resume` | 이력서 작성/첨삭 + ATS 최적화 | 3 |
 | `/cover_letter` | 자소서 작성/첨삭 ("결이요" + 5단계 첨삭) | 3 |
-| `/mock_interview` | 모의면접 5가지 모드 (인성/PT/토론/AI/기술) | 4 |
-| `/review` | 이력서↔자소서↔포트폴리오 통합 점검 | 4 |
+| `/career_history` | 경력기술서 작성/첨삭 (경력직·중고신입) | 3 |
+| `/scout_profile` | 링크드인/원티드/리멤버 프로필 첨삭 | 3 |
+| `/mock_interview` | 모의면접 7가지 모드 (인성/PT/토론/AI역량검사/기술/임원/컬처핏) | 4 |
+| `/review` | 이력서↔자소서↔포트폴리오↔프로필 통합 점검 | 4 |
 
 > 명령 표기는 Telegram 봇 노출 기준(언더스코어)입니다. 스킬 디렉토리명은 하이픈을
 > 유지합니다 (예: `company-research/`, `cover-letter/`, `mock-interview/`, `job-search/`).

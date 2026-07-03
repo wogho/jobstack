@@ -2,7 +2,7 @@
 
 자소서·이력서의 문장별 예상 꼬리질문 맵을 스킬 간에 주고받는 YAML 계약. ETHOS의 "미끼를 던져라 — 그리고 그 미끼에 대한 답변을 미리 준비하라"의 데이터 구현이다.
 
-- **산출**: cover-letter (첨삭 완료 시), review (통합 리뷰 Phase 4)
+- **산출**: cover-letter (첨삭 완료 시), review (통합 리뷰 Phase 4), career-history (경력기술서 미끼 포인트 표시 시 — 선택)
 - **소비**: mock-interview (개인화 질문 소스), retro (방어 준비율 집계 — 선택)
 - 예시 파일: templates/defense-map-example.yaml
 
@@ -22,7 +22,7 @@ $_JS_STATE/defense-maps/<회사명>_<직무>_<YYYYMMDD>.yaml
 | 필드 | 타입 | 설명 |
 |---|---|---|
 | `schema_version` | int | 1 고정 |
-| `source_skill` | string | `cover-letter` 또는 `review` |
+| `source_skill` | string | `cover-letter` \| `review` \| `career-history` |
 | `created_at` | string | KST ISO 8601 (예: 2026-07-03T18:30:00+09:00) |
 | `company` | string | 회사명 |
 | `position` | string | 직무 |
@@ -48,6 +48,7 @@ $_JS_STATE/defense-maps/<회사명>_<직무>_<YYYYMMDD>.yaml
 
 - **cover-letter**: 미끼 5개 배치 원칙에 따라 `entries` 5개 이상
 - **review**: 자소서·공고 기반 예상 질문을 entry로 귀속 (문장에 매이지 않는 공고 기반 질문은 `sentence`에 근거 요건 문구, `location`에 "공고" 표기)
+- **career-history**: 경력기술서 프로젝트 성과 문장 중 미끼 문장을 entry로 귀속 (`bait_type`은 주로 `수치`·`기술선택`·`역할범위`·`성과`, `location`에 프로젝트명 표기). 선택 산출 — 사용자가 미끼 인벤토리 저장을 원할 때만 생성
 - 질문은 꼬리질문 공통 5세트 프레임(어떤 문제였나 / 왜 그 방법이었나 / 역할 범위는 / 결과를 어떻게 확인했나 / 다시 한다면)을 기준으로 생성
 - `answer_hint`는 사용자가 답을 확인·작성한 경우에만 기록 — 스킬이 대신 지어내지 않는다
 

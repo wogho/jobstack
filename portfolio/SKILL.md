@@ -5,6 +5,7 @@ version: 0.2.0
 description: |
   포트폴리오 최적화 스킬. 프로젝트 임팩트 표현, 기술스택별 구성 가이드.
   "포트폴리오 봐줘", "포트폴리오 만들어줘", "GitHub 프로필" 등의 요청 시 활용.
+  경계: 링크드인·원티드 등 채용 플랫폼 프로필 텍스트는 /scout_profile 담당 — 이 스킬은 GitHub 레포·README·프로젝트 결과물만 다룸.
 allowed-tools:
   - Bash
   - Read

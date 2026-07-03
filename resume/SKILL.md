@@ -241,7 +241,7 @@ CI/CD              ❌          경력 #1 성과에 추가
 데이터 분석         ✅          -
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 매칭률: 60% → 목표: 80% 이상
-등급: C (60% 미만=C / 60~79%=B / 80% 이상=A, 지원 준비 완료)
+등급: B (<60%=C / 60~79%=B / 80% 이상=A · A=지원 준비 완료)
 ```
 
 매칭 결과는 **매칭률(%)에 A/B/C 등급을 병기**합니다. 0~100 정밀 스코어나 '90점 기준선' 같은 유사 정밀 지표는 쓰지 않습니다. 등급 A 기준(80% 이상)은 Phase 7 키워드 커버리지 목표(80% 이상)와 동일한 척도입니다.
@@ -361,7 +361,18 @@ CI/CD              ❌          경력 #1 성과에 추가
 
 > **완결 시 .docx 자동 산출 (#118b)**: 이력서 작성/첨삭이 **완료(DONE)** 되면, 사용자가 "파일로 줘"라고 말하지 않아도 최종본을 워크스페이스 CLAUDE.md 의 **File output protocol**(`runs/$JOBCLAW_RUN_ID/output/source.md` 작성 → `[OUTPUT_FILE: ...]` 마커 + `render-docx.sh`)로 **.docx 자동 emit** 하세요. 채팅 가독성이 낮은 긴 결과물은 파일이 기본입니다.
 >
-> **독립 CLI 실행 폴백**: `render-docx.sh`가 없는(jobclaw 워크스페이스 밖) 환경에서는 `command -v pandoc`으로 변환 도구를 확인합니다 — 있으면 `${CLAUDE_SKILL_DIR}/../bin/jobstack-export`로 md→docx 변환하고, 없으면 마크다운/HTML 파일로 산출한 뒤 변환 방법을 간단히 안내합니다.
+> **자동 emit 전 placeholder 잔존 스캔 (필수)**: 자동 emit 직전, 산출 md에 대해 아래 스캔을 돌립니다. 미확인 정보 placeholder(`[이메일 입력 필요]`·`[재직기간 확인 필요]`·`[추정]` 등)가 남아 있으면 **.docx 자동 emit을 차단**하고, 완료 상태를 **DONE_WITH_CONCERNS**로 강등한 뒤 남은 항목을 사용자에게 고지합니다(모델 판단만으로 DONE 처리 금지).
+>
+> ```bash
+> _JS_OUT="$1"  # 산출 md 경로
+> if grep -nE '\[[^]]*(확인 필요|입력 필요|추정)[^]]*\]' "$_JS_OUT"; then
+>   echo "PLACEHOLDER_RESIDUAL=true"  # → 자동 emit 차단 + DONE_WITH_CONCERNS
+> else
+>   echo "PLACEHOLDER_RESIDUAL=false" # → 자동 emit 진행
+> fi
+> ```
+>
+> **독립 CLI 실행 폴백**: `render-docx.sh`가 없는(jobclaw 워크스페이스 밖) 환경에서는 `command -v pandoc`으로 변환 도구를 확인합니다 — 있으면 `${CLAUDE_SKILL_DIR}/../bin/jobstack-export`로 md→docx 변환하고, 없으면 마크다운/HTML 파일로 산출한 뒤 변환 방법을 간단히 안내합니다. (폴백 경로에도 위 placeholder 잔존 스캔을 동일하게 적용합니다.)
 
 첨삭 모드에서는 변경사항을 시각적으로 보여줍니다:
 
