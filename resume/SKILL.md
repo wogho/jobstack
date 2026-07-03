@@ -13,7 +13,7 @@ allowed-tools:
   - Glob
   - AskUserQuestion
   - WebSearch
-benefits-from: [strategy, company-research]
+benefits-from: [strategy, company-research, experience-bank]
 ---
 
 # /resume — 이력서 작성/첨삭 스킬

@@ -59,11 +59,11 @@ else
   log_test "FAIL" "심링크 생성 (auto)" "심링크 없음"
 fi
 
-SKILL_COUNT=$(ls -d "$HOME/.claude/commands"/{auto,strategy,resume,cover-letter,company-research,mock-interview,review,tracker,retro,portfolio,job-search,ncs,salary} 2>/dev/null | wc -l | tr -d ' ')
-if [ "$SKILL_COUNT" -eq 13 ]; then
-  log_test "PASS" "전체 13개 스킬 설치"
+SKILL_COUNT=$(ls -d "$HOME/.claude/commands"/{auto,strategy,resume,cover-letter,company-research,mock-interview,review,tracker,retro,portfolio,job-search,ncs,salary,experience-bank,career-history,scout-profile} 2>/dev/null | wc -l | tr -d ' ')
+if [ "$SKILL_COUNT" -eq 16 ]; then
+  log_test "PASS" "전체 16개 스킬 설치"
 else
-  log_test "FAIL" "전체 13개 스킬 설치" "설치된 수: $SKILL_COUNT"
+  log_test "FAIL" "전체 16개 스킬 설치" "설치된 수: $SKILL_COUNT"
 fi
 
 # 1.2 jobstack-config
@@ -101,7 +101,7 @@ echo "## 2. 프리앰블 테스트"
 echo ""
 
 # 각 스킬의 프리앰블 bash 블록 실행
-for skill_dir in "$PROJECT_DIR"/{auto,strategy,resume,cover-letter,company-research,mock-interview,review,tracker,retro,portfolio,job-search,ncs,salary}; do
+for skill_dir in "$PROJECT_DIR"/{auto,strategy,resume,cover-letter,company-research,mock-interview,review,tracker,retro,portfolio,job-search,ncs,salary,experience-bank,career-history,scout-profile}; do
   skill_name=$(basename "$skill_dir")
   SKILL_FILE="$skill_dir/SKILL.md"
   if [ ! -f "$SKILL_FILE" ]; then

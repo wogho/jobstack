@@ -26,7 +26,7 @@ echo "  → $STATE_DIR"
 echo "[2/3] 스킬 설치..."
 mkdir -p "$SKILLS_DIR"
 
-SKILL_DIRS=(auto strategy company-research resume cover-letter portfolio mock-interview job-search ncs salary tracker review retro)
+SKILL_DIRS=(auto strategy company-research resume cover-letter portfolio mock-interview job-search ncs salary tracker review retro experience-bank career-history scout-profile)
 
 for skill in "${SKILL_DIRS[@]}"; do
   skill_path="$SCRIPT_DIR/$skill"

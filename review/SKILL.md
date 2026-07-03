@@ -11,7 +11,7 @@ allowed-tools:
   - Glob
   - Grep
   - AskUserQuestion
-benefits-from: [resume, cover-letter, portfolio, company-research]
+benefits-from: [resume, cover-letter, portfolio, company-research, career-history, scout-profile]
 ---
 
 ```bash

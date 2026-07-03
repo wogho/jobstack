@@ -15,7 +15,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
   - WebFetch
-benefits-from: [strategy, company-research, ncs]
+benefits-from: [strategy, company-research, ncs, experience-bank]
 ---
 
 ```bash
@@ -140,6 +140,8 @@ CEO 신년사     AI 전환                   O      지원동기에 연결
 ## Phase 2: 소재 발굴 (신규 작성 시)
 
 자소서에 쓸 소재를 AskUserQuestion으로 하나씩 발굴합니다.
+
+**경험 뱅크 우선 활용:** `$_JS_STATE/profiles/experiences.yaml`가 있으면 저장된 경험 카드를 먼저 제시하고 "이 경험들 중 이 자소서에 쓸 것을 골라주세요"로 시작합니다. 카드가 부족하거나 없으면 아래 질문으로 새 소재를 발굴합니다. 경험을 처음부터 정리하려는 사용자에게는 `/experience_bank`(경험 카드화)를 먼저 안내할 수 있습니다.
 
 **먼저 지원 유형을 확인합니다:** "신입 / 중고신입(경력 6개월~3년, 신입 전형 지원) / 경력 중 어디에 해당하나요?" — 답변에 따라 Phase 7의 맞춤 첨삭 분기를 선택합니다.
 

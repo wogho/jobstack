@@ -5,7 +5,7 @@
 set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(cd "$SCRIPT_DIR/.." && pwd)"
-SKILLS="auto strategy tracker review retro portfolio ncs salary job-search cover-letter mock-interview resume company-research"
+SKILLS="auto strategy tracker review retro portfolio ncs salary job-search cover-letter mock-interview resume company-research experience-bank career-history scout-profile"
 PASS=0
 FAIL=0
 FAILED_LIST=()

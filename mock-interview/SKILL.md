@@ -11,7 +11,7 @@ allowed-tools:
   - Write
   - AskUserQuestion
   - WebSearch
-benefits-from: [strategy, company-research, cover-letter]
+benefits-from: [strategy, company-research, cover-letter, experience-bank]
 ---
 
 ```bash
