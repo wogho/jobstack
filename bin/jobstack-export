@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# jobstack-export — 첨삭 완료 마크다운을 제출용 .docx로 변환 (ATS-safe)
+#
+# 사용법: jobstack-export <입력.md> [출력.docx]
+#   출력 생략 시 입력 파일명의 확장자만 .docx로 교체
+#
+# 종료 코드:
+#   0 — 변환 성공 (stdout에 산출 파일 절대경로 출력)
+#   1 — 입력 오류 (파일 없음 등)
+#   2 — pandoc 미설치 (호출 스킬은 md 복붙 폴백으로 전환)
+#   3 — 변환 실패
+#
+# 환경 분기 (docs 참조): jobclaw 봇 워크스페이스에서는 File output protocol
+# ([OUTPUT_FILE:] + render-docx.sh)이 docx 산출을 담당한다. 이 유틸은
+# render-docx.sh가 없는 독립 CLI 환경의 경로다.
+#
+# ATS-safe: templates/export/ats-reference.docx 기준 — 표·이미지·텍스트박스 없는
+# 단일 컬럼, 표준 제목 스타일, 본문 11pt, Noto Sans KR(Council #1 Q5 — 로컬에
+# 폰트가 없으면 시스템 한글 폰트로 대체 렌더링됨).
+
+set -u
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REFERENCE="$SCRIPT_DIR/../templates/export/ats-reference.docx"
+
+IN="${1:-}"
+if [ -z "$IN" ] || [ ! -f "$IN" ]; then
+  echo "사용법: jobstack-export <입력.md> [출력.docx]" >&2
+  [ -n "$IN" ] && echo "입력 파일을 찾을 수 없습니다: $IN" >&2
+  exit 1
+fi
+
+OUT="${2:-${IN%.md}.docx}"
+
+if ! command -v pandoc >/dev/null 2>&1; then
+  cat >&2 <<'MSG'
+pandoc 미설치 — .docx 변환을 건너뜁니다.
+  설치 후 재시도: brew install pandoc  (macOS)
+  또는 마크다운 내용을 문서 앱(Word/한글/Pages)에 복사해 저장하세요.
+MSG
+  exit 2
+fi
+
+if [ ! -f "$REFERENCE" ]; then
+  echo "경고: ATS 레퍼런스 템플릿 없음($REFERENCE) — pandoc 기본 스타일로 변환합니다" >&2
+  REF_ARGS=()
+else
+  REF_ARGS=(--reference-doc="$REFERENCE")
+fi
+
+# ATS 경고: 입력에 마크다운 표가 있으면 표 그대로 docx에 들어간다 (파싱 위험)
+if grep -qE '^\|.*\|' "$IN"; then
+  echo "경고: 입력에 표가 있습니다 — ATS 파서가 표 내용을 누락할 수 있으니 목록 형식 전환을 권장합니다" >&2
+fi
+
+if pandoc "$IN" -o "$OUT" "${REF_ARGS[@]+"${REF_ARGS[@]}"}" 2>/dev/null; then
+  # 절대경로 출력
+  case "$OUT" in
+    /*) echo "$OUT" ;;
+    *)  echo "$(cd "$(dirname "$OUT")" && pwd)/$(basename "$OUT")" ;;
+  esac
+  exit 0
+else
+  echo "변환 실패 — 마크다운 문법을 확인하거나 내용을 문서 앱에 복사해 저장하세요" >&2
+  exit 3
+fi
