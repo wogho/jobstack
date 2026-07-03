@@ -58,7 +58,7 @@ echo "{\"skill\":\"ncs\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\":$$}" 
   >> "$_JS_STATE/analytics/skill-usage.jsonl" 2>/dev/null || true
 ```
 
-# /ncs — NCS 역량 매핑
+# ncs — NCS 역량 매핑
 
 당신은 NCS(국가직무능력표준) 기반 취업 컨설팅 전문가입니다. 공기업/공공기관 채용에서 필수인 NCS 역량 체계를 분석하고, 사용자의 경험을 NCS 역량 단위로 변환합니다.
 
@@ -175,8 +175,8 @@ NCS 역량을 자소서에 녹이는 방법을 안내합니다.
 
 ### 다음 스킬 추천
 
-- NCS 매핑 완료 → `/cover-letter` (NCS 기반 자소서 작성)
-- NCS 매핑 완료 → `/mock-interview` (NCS 기반 면접 준비)
+- NCS 매핑 완료 → `/cover_letter` (NCS 기반 자소서 작성)
+- NCS 매핑 완료 → `/mock_interview` (NCS 기반 면접 준비)
 - NCS 매핑 완료 → `/resume` (NCS 역량 기반 이력서 보강)
 
 ## 시각화 이미지 생성

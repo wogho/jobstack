@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.2.0] - 2026-07-03
+
+### Fixed
+- 봇↔스킬 경계 드리프트 정리 (딥다이브 C1~C4)
+  - `/mock-interview` — AskUserQuestion 자기모순 제거: 면접 답변은 자유서술로 받는다는
+    정책과 상충하던 "AskUserQuestion으로 답변을 받습니다" 잔재 지시 3곳 정정
+  - 하드코딩 `~/.jobstack` 경로 16곳을 `$_JS_STATE` 표기로 치환
+    (auto, company-research, mock-interview, retro, strategy, tracker —
+    봇 러너의 `JOBSTACK_STATE_DIR` 강제·`Write(~/*)` deny 정책과 상충 해소)
+  - 사용자 노출 추천 명령을 Telegram 언더스코어 표기로 정정
+    (`/cover-letter` → `/cover_letter` 등 — 하이픈 표기는 봇에서 탭 불가)
+- PR #10 외부 리뷰 반영
+  - mock-interview Step 2 잔존 하이픈 표기 정정 (`/company_research`로 통일)
+  - README 명령 표기 정합 — 사용자 노출 명령은 언더스코어 표기, 지원 현황은
+    봇 네이티브 `/track`·`/myapps`, NCS는 `/cover_letter`의 공기업 NCS 보강으로
+    안내. CLI 전용 스킬은 디렉토리 표기(`tracker/`, `ncs/`)로 분리 서술
+  - job-search·ncs 스킬 본문 제목 표기 정리 (`# /job_search`, `# ncs`)
+
+### Changed
+- 유령 스킬 추천 제거 (운영자 확정 정책)
+  - `/tracker` 추천·연동 안내 제거 — 봇 네이티브 `/track`·`/myapps`로 일원화
+    (tracker 스킬 자체는 CLI 용도로 잔존)
+  - `/ncs` 추천 제거 — `/cover-letter`에 "공기업·공공기관 지원 시 NCS 직업기초능력
+    관점 보강" 소절로 흡수
+
+### Added
+- `templates/BOT-COMMAND-STYLE.md` — 사용자 노출 추천 명령 표기 규칙 문서화
+- `test/test-no-home-paths.sh` — `~/.jobstack` 하드코딩 재발 방지 린트
+  (프리앰블의 `${JOBSTACK_STATE_DIR:-$HOME/.jobstack}` 폴백은 예외)
+- `test/test-command-style.sh` — 하이픈 명령 표기·봇 미노출 스킬 추천 재발 방지 린트
+  (예외: 리포트 버전 스탬프 `jobstack /<skill> v<N>`, 디렉토리/경로 표기,
+  표기 규칙 문서 `templates/BOT-COMMAND-STYLE.md` 자체. docs/는 과거 산출물이라 미검사)
+
 ## [0.1.1] - 2026-04-07
 
 ### Fixed
