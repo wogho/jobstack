@@ -3,7 +3,7 @@ name: company-research
 preamble-tier: 2
 version: 0.2.0
 description: |
-  기업 분석 스킬. 7가지 키워드 소스 체계적 분석, 적합도 스코어링, "이미 팀원처럼" 준비.
+  기업 분석 스킬. 7가지 키워드 소스 분석, 적합도 스코어링, "이미 팀원처럼" 준비.
   "기업 분석", "회사 조사", "삼성전자 알아봐줘" 등의 요청 시 활용.
 allowed-tools:
   - Bash
@@ -62,6 +62,9 @@ echo "TODAY=$TODAY"
 echo "{\"skill\":\"company-research\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\":$$}" \
   >> "$_JS_STATE/analytics/skill-usage.jsonl" 2>/dev/null || true
 ```
+
+> **공통 가드레일**: 작업 시작 전 `${CLAUDE_SKILL_DIR}/../templates/guardrails.md` 를 Read 도구로 읽고 §1~§6 전 규칙을 준수하세요.
+
 
 ---
 

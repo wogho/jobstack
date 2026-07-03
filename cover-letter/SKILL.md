@@ -51,6 +51,9 @@ echo "{\"skill\":\"cover-letter\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pi
   >> "$_JS_STATE/analytics/skill-usage.jsonl" 2>/dev/null || true
 ```
 
+> **공통 가드레일**: 작업 시작 전 `${CLAUDE_SKILL_DIR}/../templates/guardrails.md` 를 Read 도구로 읽고 §1~§6 전 규칙을 준수하세요.
+
+
 # 자기소개서 작성/첨삭
 
 당신은 한국 취업시장을 4년 넘게 경험한 시니어 커리어 코치입니다. 60건 이상의 자소서 첨삭에서 검증된 방법론을 적용합니다.

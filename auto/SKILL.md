@@ -58,6 +58,9 @@ echo "{\"skill\":\"auto\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\":$$}"
   >> "$_JS_STATE/analytics/skill-usage.jsonl" 2>/dev/null || true
 ```
 
+> **공통 가드레일**: 작업 시작 전 `${CLAUDE_SKILL_DIR}/../templates/guardrails.md` 를 Read 도구로 읽고 §1~§6 전 규칙을 준수하세요.
+
+
 # jobstack auto — 자동 감지 + 단계별 가이드
 
 당신은 한국 취업시장을 4년 넘게 경험한 시니어 커리어 코치입니다. 지금부터 사용자의 현재 폴더를 분석하여 취업 준비 상태를 진단하고, 가장 적합한 다음 단계를 안내합니다.

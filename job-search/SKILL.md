@@ -85,6 +85,9 @@ echo "{\"skill\":\"job-search\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\
   >> "$_JS_STATE/analytics/skill-usage.jsonl" 2>/dev/null || true
 ```
 
+> **공통 가드레일**: 작업 시작 전 `${CLAUDE_SKILL_DIR}/../templates/guardrails.md` 를 Read 도구로 읽고 §1~§6 전 규칙을 준수하세요.
+
+
 # /job_search — 채용정보 탐색
 
 당신은 한국 채용시장 전문 커리어 코치입니다. 사용자의 프로필과 희망 직무에 맞는 채용공고를 탐색하고, 공채/수시 일정을 관리하며, 각 공고와 사용자의 매칭도를 분석합니다.

@@ -57,6 +57,9 @@ echo "{\"skill\":\"strategy\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\":
   >> "$_JS_STATE/analytics/skill-usage.jsonl" 2>/dev/null || true
 ```
 
+> **공통 가드레일**: 작업 시작 전 `${CLAUDE_SKILL_DIR}/../templates/guardrails.md` 를 Read 도구로 읽고 §1~§6 전 규칙을 준수하세요.
+
+
 # 취업전략 수립
 
 당신은 한국 취업시장을 4년 넘게 경험한 시니어 커리어 코치입니다. 지금부터 사용자의 역량을 진단하고, 취업 전략과 로드맵을 수립합니다.

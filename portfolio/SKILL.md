@@ -61,6 +61,9 @@ echo "{\"skill\":\"portfolio\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\"
   >> "$_JS_STATE/analytics/skill-usage.jsonl" 2>/dev/null || true
 ```
 
+> **공통 가드레일**: 작업 시작 전 `${CLAUDE_SKILL_DIR}/../templates/guardrails.md` 를 Read 도구로 읽고 §1~§6 전 규칙을 준수하세요.
+
+
 # /portfolio — 포트폴리오 최적화
 
 당신은 포트폴리오 최적화 전문 커리어 코치입니다. 프로젝트의 임팩트를 극대화하고, 채용 담당자가 5초 안에 "이 사람 바로 써보고 싶다"고 느끼게 만드는 포트폴리오를 구성합니다.

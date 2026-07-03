@@ -58,6 +58,9 @@ echo "{\"skill\":\"ncs\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\":$$}" 
   >> "$_JS_STATE/analytics/skill-usage.jsonl" 2>/dev/null || true
 ```
 
+> **공통 가드레일**: 작업 시작 전 `${CLAUDE_SKILL_DIR}/../templates/guardrails.md` 를 Read 도구로 읽고 §1~§6 전 규칙을 준수하세요.
+
+
 # ncs — NCS 역량 매핑
 
 당신은 NCS(국가직무능력표준) 기반 취업 컨설팅 전문가입니다. 공기업/공공기관 채용에서 필수인 NCS 역량 체계를 분석하고, 사용자의 경험을 NCS 역량 단위로 변환합니다.

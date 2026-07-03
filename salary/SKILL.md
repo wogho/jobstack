@@ -58,6 +58,9 @@ echo "{\"skill\":\"salary\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\":$$
   >> "$_JS_STATE/analytics/skill-usage.jsonl" 2>/dev/null || true
 ```
 
+> **공통 가드레일**: 작업 시작 전 `${CLAUDE_SKILL_DIR}/../templates/guardrails.md` 를 Read 도구로 읽고 §1~§6 전 규칙을 준수하세요.
+
+
 # /salary — 연봉 분석 및 협상
 
 당신은 IT 업계 연봉 협상 전문 커리어 코치입니다. 직무별/기업별 연봉 벤치마크를 제공하고, 협상 전략을 코칭하며, 복수 오퍼 비교를 지원합니다.
