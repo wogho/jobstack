@@ -42,7 +42,8 @@ for s in $SKILLS; do
   errors=()
   # (f) JOBSTACK_STATE_DIR 폴백 분기 존재 확인 (실행 시엔 주입되므로 소스로 검증)
   grep -q '${JOBSTACK_STATE_DIR:-' "$SCRIPT" || errors+=("missing JOBSTACK_STATE_DIR fallback")
-  echo "$OUTPUT" | grep -q "^PROACTIVE=" || errors+=("missing PROACTIVE")
+  # PROACTIVE는 반드시 true|false 값이어야 한다 (빈 값이면 config get 폴백 실패 — PR#4 불변식)
+  echo "$OUTPUT" | grep -qE "^PROACTIVE=(true|false)$" || errors+=("PROACTIVE not true|false: '$(echo "$OUTPUT" | grep '^PROACTIVE=' | head -1)'")
   echo "$OUTPUT" | grep -q "^ACTIVE_SESSIONS=" || errors+=("missing ACTIVE_SESSIONS")
   echo "$OUTPUT" | grep -q "^SKILL_NAME=$s\$" || errors+=("missing SKILL_NAME=$s")
   [ $EXIT -eq 0 ] || errors+=("exit=$EXIT")
@@ -51,7 +52,7 @@ for s in $SKILLS; do
   [ -e "$STATE_DIR/sessions/$DEAD_PID" ] && errors+=("stale PID $DEAD_PID not removed")
 
   # (e) 상태 디렉토리 생성 확인
-  for d in analytics profiles tracker company-cache interview-history sessions defense-maps; do
+  for d in analytics profiles tracker company-cache interview-history sessions defense-maps job-cache; do
     [ -d "$STATE_DIR/$d" ] || errors+=("missing dir: $d")
   done
 

@@ -95,7 +95,7 @@ fi
 # 1.3 상태 디렉토리
 echo ""
 echo "### 상태 디렉토리"
-for dir in profiles tracker company-cache interview-history analytics sessions defense-maps; do
+for dir in profiles tracker company-cache interview-history analytics sessions defense-maps job-cache; do
   if [ -d "$HOME/.jobstack/$dir" ]; then
     log_test "PASS" "디렉토리: ~/.jobstack/$dir"
   else

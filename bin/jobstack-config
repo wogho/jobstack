@@ -18,7 +18,14 @@ usage() {
 case "$1" in
   get)
     [ $# -lt 2 ] && usage
-    grep "^$2:" "$CONFIG_FILE" 2>/dev/null | sed "s/^$2: *//" || echo ""
+    # 미설정 키는 빈 문자열 + exit 1 로 반환한다 — 호출측의 `|| echo "기본값"`
+    # 폴백이 작동하도록(프리앰블 PROACTIVE 등이 빈 문자열로 떨어지지 않게).
+    _val=$(grep "^$2:" "$CONFIG_FILE" 2>/dev/null | sed "s/^$2: *//")
+    if [ -n "$_val" ]; then
+      echo "$_val"
+    else
+      exit 1
+    fi
     ;;
   set)
     [ $# -lt 3 ] && usage

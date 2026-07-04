@@ -8,7 +8,8 @@
 #   0 — 변환 성공 (stdout에 산출 파일 절대경로 출력)
 #   1 — 입력 오류 (파일 없음 등)
 #   2 — pandoc 미설치 (호출 스킬은 md 복붙 폴백으로 전환)
-#   3 — 변환 실패
+#   3 — 변환 실패 (호출 스킬은 md 복붙 폴백으로 전환)
+#   4 — 미확인 placeholder 잔존 (markdown 복붙 폴백 금지 — 항목 보완 후 재시도)
 #
 # 환경 분기 (docs 참조): jobclaw 봇 워크스페이스에서는 File output protocol
 # ([OUTPUT_FILE:] + render-docx.sh)이 docx 산출을 담당한다. 이 유틸은

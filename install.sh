@@ -19,7 +19,7 @@ echo ""
 
 # 1. 상태 디렉토리 생성
 echo "[1/3] 상태 디렉토리 생성..."
-mkdir -p "$STATE_DIR"/{profiles,tracker,company-cache,interview-history,analytics,sessions,defense-maps}
+mkdir -p "$STATE_DIR"/{profiles,tracker,company-cache,interview-history,analytics,sessions,defense-maps,job-cache}
 echo "  → $STATE_DIR"
 
 # 2. 스킬 설치 (심링크)

@@ -21,7 +21,7 @@ benefits-from: [strategy, company-research, ncs, experience-bank]
 ```bash
 _JS_STATE="${JOBSTACK_STATE_DIR:-$HOME/.jobstack}"
 mkdir -p "$_JS_STATE/analytics" "$_JS_STATE/profiles" "$_JS_STATE/tracker" \
-         "$_JS_STATE/company-cache" "$_JS_STATE/interview-history" "$_JS_STATE/sessions" "$_JS_STATE/defense-maps"
+         "$_JS_STATE/company-cache" "$_JS_STATE/interview-history" "$_JS_STATE/sessions" "$_JS_STATE/defense-maps" "$_JS_STATE/job-cache"
 echo "$$" > "$_JS_STATE/sessions/$$"
 trap 'rm -f "$_JS_STATE/sessions/$$"' EXIT
 _JS_CONFIG="${CLAUDE_SKILL_DIR}/../bin/jobstack-config"
