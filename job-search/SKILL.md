@@ -143,7 +143,7 @@ echo "{\"skill\":\"job-search\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\
 ```
 원티드 API URL에 `&years={N}` 추가. 경력 미지정 시 파라미터 생략.
 
-**희망 지역 → fetch-jobs.mjs location 인수 매핑:**
+**희망 지역 → fetch-jobs.mjs location 인수 매핑 (사람인·잡코리아 전용):**
 - 서울 → `seoul`
 - 경기(판교/수원 등) → `gyeonggi`
 - 부산 → `busan`
@@ -154,9 +154,10 @@ echo "{\"skill\":\"job-search\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\
 - 원격/재택 → `remote`
 - 미지정 → (생략, 전체 지역)
 
-**원티드 지역 필터 (`locations[]` 파라미터):**
-원티드 API URL에 `&locations%5B%5D={location}` 추가. 예: 서울=`&locations%5B%5D=seoul`.
-원격은 `&locations%5B%5D=anywhere` 사용.
+> ⚠️ **플랫폼별 지역 필터 지원 차이 (반드시 출력에 표시)**
+> - **사람인·잡코리아**: 정식 지역 필터 파라미터를 지원하므로 위 매핑을 적용합니다.
+> - **원티드**: 지역 필터를 **지원하지 않습니다** — 카드에 근무지가 안정적으로 노출되지 않아 후필터 시 결과가 0건으로 과도하게 좁아지기 때문입니다(prod 검증). `fetch-jobs.mjs`는 원티드에서 **전 지역 결과를 반환**합니다(수율 우선).
+> - 따라서 사용자가 "서울/원격만" 같은 지역 조건을 준 경우에도 **원티드 결과는 전 지역일 수 있음**을 출력에 명시합니다. 예: "원티드는 지역 필터 미지원 — 전 지역 결과이니 근무지를 직접 확인하세요." 지역 조건이 중요하면 사람인·잡코리아 결과를 우선 안내합니다.
 
 **연봉 필터 처리:**
 - 원티드: 응답 JSON의 `annual_from`/`annual_to` 필드로 수집 후 필터링. (예: 최소 5000만원 → `annual_to >= 5000`)
@@ -235,11 +236,9 @@ echo "{\"skill\":\"job-search\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\
 # 기본 URL
 https://www.wanted.co.kr/api/v4/jobs?tag_type_ids={CATEGORY_ID}&country=kr&job_sort=job.latest_order&limit=20&offset=0
 
-# 지역 필터 추가 (복수 지정 가능)
-# &locations%5B%5D=seoul          서울
-# &locations%5B%5D=gyeonggi       경기
-# &locations%5B%5D=anywhere       원격/재택
-# 예: 서울 한정 → URL 끝에 &locations%5B%5D=seoul 추가
+# ⚠️ 지역 필터: 원티드는 지역 필터를 적용하지 않는다(전 지역 반환, 수율 우선).
+#    카드에 근무지가 안정적으로 노출되지 않아 후필터 시 결과 0건으로 과도하게 좁아짐(prod 검증).
+#    지역 조건은 사람인·잡코리아 결과로 안내하고, 원티드 결과는 전 지역임을 출력에 표시한다.
 
 # 연봉 필터: API에 파라미터 없음 → 응답의 annual_from/annual_to 필드로 수집 후 필터
 # annual_from: 최소 연봉(만원), annual_to: 최대 연봉(만원), null이면 미기재

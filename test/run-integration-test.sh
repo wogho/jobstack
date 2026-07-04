@@ -6,6 +6,9 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 TEST_DATA="$SCRIPT_DIR/sample-data"
 REPORT="$SCRIPT_DIR/test-report.md"
+# 상태 루트는 프리앰블·install.sh와 동일하게 JOBSTACK_STATE_DIR 폴백을 따른다.
+# (jobclaw/봇 러너처럼 JOBSTACK_STATE_DIR를 HOME과 다른 경로로 주입하는 격리 환경도 검증)
+STATE_DIR="${JOBSTACK_STATE_DIR:-$HOME/.jobstack}"
 PASS=0
 FAIL=0
 TOTAL=0
@@ -92,14 +95,30 @@ else
   log_test "FAIL" "config list"
 fi
 
+# 기존 키 재-set 회귀 (BSD/GNU sed 이식성 — sed -i '' 버그 방지)
+"$PROJECT_DIR/bin/jobstack-config" set test_key updated_value 2>/dev/null
+RESULT2=$("$PROJECT_DIR/bin/jobstack-config" get test_key 2>/dev/null)
+if [ "$RESULT2" = "updated_value" ]; then
+  log_test "PASS" "config set 기존 키 갱신"
+else
+  log_test "FAIL" "config set 기존 키 갱신" "결과: $RESULT2 (기대: updated_value)"
+fi
+
+# 미설정 키는 exit 1 (프리앰블 PROACTIVE 폴백 전제)
+if "$PROJECT_DIR/bin/jobstack-config" get __nonexistent_key__ >/dev/null 2>&1; then
+  log_test "FAIL" "config get 미설정 키 exit 1" "exit 0 반환"
+else
+  log_test "PASS" "config get 미설정 키 exit 1"
+fi
+
 # 1.3 상태 디렉토리
 echo ""
 echo "### 상태 디렉토리"
 for dir in profiles tracker company-cache interview-history analytics sessions defense-maps job-cache; do
-  if [ -d "$HOME/.jobstack/$dir" ]; then
-    log_test "PASS" "디렉토리: ~/.jobstack/$dir"
+  if [ -d "$STATE_DIR/$dir" ]; then
+    log_test "PASS" "디렉토리: $STATE_DIR/$dir"
   else
-    log_test "FAIL" "디렉토리: ~/.jobstack/$dir" "존재하지 않음"
+    log_test "FAIL" "디렉토리: $STATE_DIR/$dir" "존재하지 않음"
   fi
 done
 
@@ -208,7 +227,7 @@ echo ""
 echo "## 5. tracker JSONL 테스트"
 echo ""
 
-TRACKER_FILE="$HOME/.jobstack/tracker/applications.jsonl"
+TRACKER_FILE="$STATE_DIR/tracker/applications.jsonl"
 # 테스트 데이터 추가
 echo '{"id":"app-001","company":"네이버","position":"백엔드 개발자","status":"서류전형","applied_at":"2026-03-29","deadline":"2026-04-30","updated_at":"2026-03-29","notes":"코딩테스트 준비 필요"}' > "$TRACKER_FILE"
 echo '{"id":"app-002","company":"카카오","position":"서버 개발자","status":"준비중","applied_at":"2026-03-29","deadline":"2026-05-15","updated_at":"2026-03-29","notes":""}' >> "$TRACKER_FILE"
@@ -238,7 +257,7 @@ echo ""
 echo "## 6. 프로필 저장 테스트"
 echo ""
 
-PROFILE_FILE="$HOME/.jobstack/profiles/default.yaml"
+PROFILE_FILE="$STATE_DIR/profiles/default.yaml"
 cat > "$PROFILE_FILE" << 'EOF'
 name: 홍길동
 email: hong@example.com
@@ -287,7 +306,7 @@ echo ""
 echo "## 7. 텔레메트리 테스트"
 echo ""
 
-ANALYTICS_FILE="$HOME/.jobstack/analytics/skill-usage.jsonl"
+ANALYTICS_FILE="$STATE_DIR/analytics/skill-usage.jsonl"
 echo '{"skill":"auto","ts":"2026-03-29T06:48:00Z","pid":1234}' > "$ANALYTICS_FILE"
 echo '{"skill":"strategy","ts":"2026-03-29T06:50:00Z","pid":1234}' >> "$ANALYTICS_FILE"
 echo '{"skill":"resume","ts":"2026-03-29T06:55:00Z","pid":1234}' >> "$ANALYTICS_FILE"

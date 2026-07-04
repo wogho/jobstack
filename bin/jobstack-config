@@ -30,7 +30,10 @@ case "$1" in
   set)
     [ $# -lt 3 ] && usage
     if grep -q "^$2:" "$CONFIG_FILE" 2>/dev/null; then
-      sed -i '' "s|^$2:.*|$2: $3|" "$CONFIG_FILE"
+      # BSD/macOS의 `sed -i ''`는 GNU/Linux에서 ''를 파일명으로 해석해 실패한다.
+      # 임시 파일 교체 방식으로 두 플랫폼 모두에서 동작하게 한다.
+      _tmp=$(mktemp)
+      sed "s|^$2:.*|$2: $3|" "$CONFIG_FILE" > "$_tmp" && mv "$_tmp" "$CONFIG_FILE"
     else
       echo "$2: $3" >> "$CONFIG_FILE"
     fi
