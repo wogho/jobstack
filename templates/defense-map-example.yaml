@@ -1,0 +1,37 @@
+# defense-map 예시 — 스키마 정의는 docs/defense-map-schema.md 참조
+# 저장 위치: $_JS_STATE/defense-maps/<회사명>_<직무>_<YYYYMMDD>.yaml
+# 주의: 이 파일은 필드 형식을 보여주는 축약본(entry 2개)이다.
+#       실제 cover-letter 산출물은 미끼 5개 배치 원칙에 따라 entries 5개 이상이어야 한다.
+schema_version: 1
+source_skill: cover-letter
+created_at: "2026-07-03T18:30:00+09:00"
+company: 네이버
+position: 백엔드-개발자
+document_ref: 자소서_네이버_홍길동.md
+entries:
+  - id: dm-001
+    sentence: "Redis 캐싱 도입으로 응답시간을 350ms에서 15ms로 단축했습니다."
+    location: "문항 2, 두 번째 단락"
+    bait_type: 수치
+    questions:
+      - q: "350ms에서 15ms라는 수치는 어떻게 측정했나요?"
+        intent: "수치의 실측 여부와 측정 방법 이해도 검증"
+        difficulty: normal
+      - q: "캐시 무효화 전략은 어떻게 가져갔나요?"
+        intent: "Redis를 실제로 운영해 봤는지 기술 깊이 검증"
+        difficulty: hard
+    answer_hint: "부하테스트 도구로 p95 기준 측정, 무효화는 TTL+이벤트 기반 병행 — 실패 사례 1개 포함해 1분 구성"
+    defense_status: ready
+  - id: dm-002
+    sentence: "팀 내 코드 리뷰 문화를 개선했습니다."
+    location: "문항 3, 첫 단락"
+    bait_type: 역할범위
+    questions:
+      - q: "개선 전후로 무엇이 달라졌는지 구체적으로 말해 주세요."
+        intent: "성과의 실체와 본인 기여 범위 확인"
+        difficulty: normal
+      - q: "팀원들이 반대했을 때 어떻게 설득했나요?"
+        intent: "협업 갈등 처리 방식 검증"
+        difficulty: normal
+    answer_hint: null
+    defense_status: unprepared

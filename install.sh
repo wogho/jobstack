@@ -19,14 +19,14 @@ echo ""
 
 # 1. 상태 디렉토리 생성
 echo "[1/3] 상태 디렉토리 생성..."
-mkdir -p "$STATE_DIR"/{profiles,tracker,company-cache,interview-history,analytics,sessions}
+mkdir -p "$STATE_DIR"/{profiles,tracker,company-cache,interview-history,analytics,sessions,defense-maps,job-cache}
 echo "  → $STATE_DIR"
 
 # 2. 스킬 설치 (심링크)
 echo "[2/3] 스킬 설치..."
 mkdir -p "$SKILLS_DIR"
 
-SKILL_DIRS=(auto strategy company-research resume cover-letter portfolio mock-interview job-search ncs salary tracker review retro)
+SKILL_DIRS=(auto strategy company-research resume cover-letter portfolio mock-interview job-search ncs salary tracker review retro experience-bank career-history scout-profile)
 
 for skill in "${SKILL_DIRS[@]}"; do
   skill_path="$SCRIPT_DIR/$skill"
@@ -38,6 +38,18 @@ for skill in "${SKILL_DIRS[@]}"; do
     [ -d "$target" ] && rm -rf "$target"
     ln -s "$skill_path" "$target"
     echo "  → /$link_name"
+
+    # 언더스코어 alias — 하이픈 명령은 봇(Telegram)에서 탭이 안 되고,
+    # README·스킬 본문이 사용자 노출 명령을 언더스코어로 안내하므로,
+    # CLI(Claude Code)에서도 /cover_letter 형태가 동작하도록 alias 심링크를 함께 만든다.
+    if [[ "$skill" == *-* ]]; then
+      alias_name="${PREFIX}${skill//-/_}"
+      alias_target="$SKILLS_DIR/$alias_name"
+      [ -L "$alias_target" ] && rm "$alias_target"
+      [ -d "$alias_target" ] && rm -rf "$alias_target"
+      ln -s "$skill_path" "$alias_target"
+      echo "  → /$alias_name (alias)"
+    fi
   fi
 done
 

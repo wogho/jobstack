@@ -11,6 +11,7 @@ PREAMBLE=$(cat "$TEMPLATE_DIR/preamble.md")
 VOICE=$(cat "$TEMPLATE_DIR/voice.md")
 ASK_USER=$(cat "$TEMPLATE_DIR/ask-user-question.md")
 COMPLETION=$(cat "$TEMPLATE_DIR/completion-status.md")
+GUARDRAILS=$(cat "$TEMPLATE_DIR/guardrails.md")
 
 count=0
 for tmpl in "$ROOT_DIR"/*/SKILL.md.tmpl; do
@@ -26,6 +27,9 @@ for tmpl in "$ROOT_DIR"/*/SKILL.md.tmpl; do
   content="${content//\{\{VOICE\}\}/$VOICE}"
   content="${content//\{\{ASK_USER_QUESTION\}\}/$ASK_USER}"
   content="${content//\{\{COMPLETION_STATUS\}\}/$COMPLETION}"
+  content="${content//\{\{GUARDRAILS\}\}/$GUARDRAILS}"
+  # 프리앰블의 __SKILL_NAME__ 플레이스홀더를 스킬 디렉토리명 리터럴로 치환
+  content="${content//__SKILL_NAME__/$(basename "$skill_dir")}"
 
   echo "$content" > "$output"
   count=$((count + 1))

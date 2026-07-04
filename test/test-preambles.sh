@@ -5,7 +5,7 @@
 set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(cd "$SCRIPT_DIR/.." && pwd)"
-SKILLS="auto strategy tracker review retro portfolio ncs salary job-search cover-letter mock-interview resume company-research"
+SKILLS="auto strategy tracker review retro portfolio ncs salary job-search cover-letter mock-interview resume company-research experience-bank career-history scout-profile"
 PASS=0
 FAIL=0
 FAILED_LIST=()
@@ -26,6 +26,12 @@ for s in $SKILLS; do
   SCRIPT=$(mktemp)
   extract_bash "$SKILL_FILE" > "$SCRIPT"
 
+  # (d) stale PID 정리 검증: 죽은 세션 파일을 미리 심는다 (eea3c6c 회귀의 핵심 로직).
+  # 999999는 현실적으로 살아있지 않은 PID라 kill -0 실패 → stale 루프가 제거해야 한다.
+  mkdir -p "$STATE_DIR/sessions"
+  DEAD_PID=999999
+  echo "$DEAD_PID" > "$STATE_DIR/sessions/$DEAD_PID"
+
   OUTPUT=$(
     JOBSTACK_STATE_DIR="$STATE_DIR" \
     CLAUDE_SKILL_DIR="$REPO/$s" \
@@ -34,10 +40,21 @@ for s in $SKILLS; do
   EXIT=$?
 
   errors=()
-  echo "$OUTPUT" | grep -q "^PROACTIVE=" || errors+=("missing PROACTIVE")
+  # (f) JOBSTACK_STATE_DIR 폴백 분기 존재 확인 (실행 시엔 주입되므로 소스로 검증)
+  grep -q '${JOBSTACK_STATE_DIR:-' "$SCRIPT" || errors+=("missing JOBSTACK_STATE_DIR fallback")
+  # PROACTIVE는 반드시 true|false 값이어야 한다 (빈 값이면 config get 폴백 실패 — PR#4 불변식)
+  echo "$OUTPUT" | grep -qE "^PROACTIVE=(true|false)$" || errors+=("PROACTIVE not true|false: '$(echo "$OUTPUT" | grep '^PROACTIVE=' | head -1)'")
   echo "$OUTPUT" | grep -q "^ACTIVE_SESSIONS=" || errors+=("missing ACTIVE_SESSIONS")
   echo "$OUTPUT" | grep -q "^SKILL_NAME=$s\$" || errors+=("missing SKILL_NAME=$s")
   [ $EXIT -eq 0 ] || errors+=("exit=$EXIT")
+
+  # (d) 죽은 세션 파일이 stale 루프로 제거됐는지
+  [ -e "$STATE_DIR/sessions/$DEAD_PID" ] && errors+=("stale PID $DEAD_PID not removed")
+
+  # (e) 상태 디렉토리 생성 확인
+  for d in analytics profiles tracker company-cache interview-history sessions defense-maps job-cache; do
+    [ -d "$STATE_DIR/$d" ] || errors+=("missing dir: $d")
+  done
 
   remaining=$(ls "$STATE_DIR/sessions/" 2>/dev/null | wc -l | tr -d ' ')
   [ "$remaining" -eq 0 ] || errors+=("sessions/ not cleaned: $remaining files left")

@@ -13,8 +13,8 @@
 | Tier | 용도 | 스킬 |
 |------|------|------|
 | 1 | 진입점, 항상 사용 가능 | auto, strategy, tracker |
-| 2 | 분석/조사 | company-research, portfolio, job-search, ncs, salary, retro |
-| 3 | 문서 작성 | resume, cover-letter |
+| 2 | 분석/조사 | company-research, portfolio, job-search, ncs, salary, retro, experience-bank |
+| 3 | 문서 작성 | resume, cover-letter, career-history, scout-profile |
 | 4 | 복합 대화형 | mock-interview, review |
 
 ## 스킬 추가 방법
