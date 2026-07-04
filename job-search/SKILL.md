@@ -110,7 +110,7 @@ echo "{\"skill\":\"job-search\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\
 - **URL 입력**: WebFetch로 본문을 확보합니다. 원티드 링크는 HTML 대신 API detail endpoint(`https://www.wanted.co.kr/api/v4/jobs/{id}`)를 사용합니다. 사람인 단축 URL은 Phase 2의 #118d 규칙(리다이렉트 재시도 → 실패 시에만 복붙 요청)을 따릅니다.
 - **원문 붙여넣기**: 붙여넣은 텍스트를 그대로 공고 본문으로 취급합니다.
 - 두 경우 모두 **본문을 확보한 상태**이므로 Phase 4의 '본문 미확보 시 점수 금지' 가드를 충족해 매칭 스코어를 산출할 수 있습니다.
-- 분석 결과(추출 키워드·자소서 문항)는 Phase 6과 동일 포맷으로 tracker에 저장합니다.
+- 분석 결과(추출 키워드·자소서 문항)는 관심 공고 북마크로서 `$_JS_STATE/job-cache/`에 저장합니다(실제 지원 항목 전용인 tracker/applications.jsonl과 분리 — 사용자가 지원을 결심하면 그때 tracker에 편입).
 - "이 공고 기준으로 이력서/자소서 첨삭" 같은 후속 요청은 `/resume`·`/cover_letter` 추천으로 연결합니다.
 
 ### Phase 1: 타겟 직무/산업 확인
@@ -477,7 +477,7 @@ echo '{"skill":"job-search","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","pid":'$$',"
 
 - 관심 공고 확정 → `/company_research` (해당 기업 분석)
 - 관심 공고 확정 → `/resume` (해당 공고 맞춤 이력서)
-- 관심 공고 확정 → `/cover_letter` — 이 공고의 키워드·자소서 문항은 tracker에 저장되어 있어 `/cover_letter` 실행 시 활용 가능
+- 관심 공고 확정 → `/cover_letter` — 이 공고의 키워드·자소서 문항은 `$_JS_STATE/job-cache/`에 북마크로 저장되어 있어 `/cover_letter` 실행 시 활용 가능
 
 ## 시각화 이미지 생성
 
