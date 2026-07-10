@@ -1,5 +1,7 @@
 # jobstack
 
+**Changing Cloude Code -> Hermes agent**
+
 **한국 취업 통합 엑셀러레이터** — Claude Code 스킬 시스템
 
 4년간 60건+ 자소서 첨삭에서 검증된 방법론을 AI 코칭으로 제공합니다.
