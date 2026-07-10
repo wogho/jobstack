@@ -29,7 +29,7 @@ echo "$$" > "$_JS_STATE/sessions/$$"
 trap 'rm -f "$_JS_STATE/sessions/$$"' EXIT
 
 # 설정 로딩
-_JS_CONFIG="${CLAUDE_SKILL_DIR}/../bin/jobstack-config"
+_JS_CONFIG="${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/bin/jobstack-config"
 if [ -x "$_JS_CONFIG" ]; then
   PROACTIVE=$("$_JS_CONFIG" get proactive 2>/dev/null || echo "true")
 else
@@ -62,7 +62,7 @@ echo "{\"skill\":\"portfolio\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\"
   >> "$_JS_STATE/analytics/skill-usage.jsonl" 2>/dev/null || true
 ```
 
-> **공통 가드레일**: 작업 시작 전 `${CLAUDE_SKILL_DIR}/../templates/guardrails.md` 를 Read 도구로 읽고 §1~§6 전 규칙을 준수하세요.
+> **공통 가드레일**: 작업 시작 전 `${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/templates/guardrails.md` 를 Read 도구로 읽고 §1~§6 전 규칙을 준수하세요.
 
 
 # /portfolio — 포트폴리오 최적화
@@ -129,7 +129,7 @@ echo "{\"skill\":\"portfolio\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\"
 
 각 프로젝트에 대해 before→after 수치화를 적용합니다.
 
-**수치 날조 방지 (필수):** 수치는 사용자가 제공했거나 세션에서 확인된 것만 사용합니다. 확인 안 된 수치는 만들어 넣지 않고 `[수치 확인 필요]` placeholder + 질문 1회로 처리합니다. (`${CLAUDE_SKILL_DIR}/../templates/guardrails.md` §1 날조 금지 참조)
+**수치 날조 방지 (필수):** 수치는 사용자가 제공했거나 세션에서 확인된 것만 사용합니다. 확인 안 된 수치는 만들어 넣지 않고 `[수치 확인 필요]` placeholder + 질문 1회로 처리합니다. (`${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/templates/guardrails.md` §1 날조 금지 참조)
 
 **변환 원칙:**
 - "로그인 기능 구현" → "JWT 기반 인증 시스템 구축, 세션 관리 비용 40% 절감"
@@ -138,7 +138,7 @@ echo "{\"skill\":\"portfolio\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\"
 
 > 위 3개는 형식 예시일 뿐이며, 실제 수치는 사용자의 실제 데이터로만 채웁니다.
 
-**수치가 없을 때:** 성과 숫자가 없다고 해서 만들어 넣지 않습니다. `${CLAUDE_SKILL_DIR}/../templates/experience-methods.md` §3(수치 폴백 5기준 + 대체 4종)을 적용해 대체 근거를 찾습니다:
+**수치가 없을 때:** 성과 숫자가 없다고 해서 만들어 넣지 않습니다. `${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/templates/experience-methods.md` §3(수치 폴백 5기준 + 대체 4종)을 적용해 대체 근거를 찾습니다:
 
 - **범위** — 담당 모듈 수 (예: 전체 12개 API 중 8개 담당)
 - **빈도** — 주간 배포 횟수 (예: 주 1회 배포 운영)
@@ -285,14 +285,14 @@ Phase 2에서 확인한 직군에 맞는 템플릿으로 구조를 잡습니다.
 
 ## 완료 상태
 
-완료 상태 4종과 뷰어 안내는 `${CLAUDE_SKILL_DIR}/../templates/completion-status.md` 기준을 따릅니다.
+완료 상태 4종과 뷰어 안내는 `${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/templates/completion-status.md` 기준을 따릅니다.
 
 - **완료 (DONE)** — 모든 단계 완료, 근거 제시
 - **우려사항 있는 완료 (DONE_WITH_CONCERNS)** — 완료, 알아야 할 사항 명시
 - **차단됨 (BLOCKED)** — 진행 불가, 차단 요인 기술. **채용공고·기사 등 시간 민감 데이터는 훈련 데이터로 절대 대체하지 않고**, 해당 섹션을 스킵한 뒤 `DONE_WITH_CONCERNS`로 처리합니다.
 - **추가 정보 필요 (NEEDS_CONTEXT)** — 필요한 내용 기술
 
-**결과물 뷰어**: 리라이팅된 README·갭 분석 리포트 등 Markdown 결과물을 생성하면 `$CLAUDE_SKILL_DIR/../bin/jobstack-view <결과파일.md>`로 브라우저에서 열도록 안내합니다(스타일링된 HTML + PDF 저장 가능).
+**결과물 뷰어**: 리라이팅된 README·갭 분석 리포트 등 Markdown 결과물을 생성하면 `$CLAUDE_SKILL_DIR~/.hermes/skills/jobstack/bin/# Hermes 웹 대시보드(포트 9443)에서 열람 가능 <결과파일.md>`로 브라우저에서 열도록 안내합니다(스타일링된 HTML + PDF 저장 가능).
 
 ### 다음 스킬 추천
 

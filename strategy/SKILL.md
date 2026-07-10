@@ -24,7 +24,7 @@ echo "$$" > "$_JS_STATE/sessions/$$"
 trap 'rm -f "$_JS_STATE/sessions/$$"' EXIT
 
 # 설정 로딩
-_JS_CONFIG="${CLAUDE_SKILL_DIR}/../bin/jobstack-config"
+_JS_CONFIG="${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/bin/jobstack-config"
 if [ -x "$_JS_CONFIG" ]; then
   PROACTIVE=$("$_JS_CONFIG" get proactive 2>/dev/null || echo "true")
 else
@@ -57,7 +57,7 @@ echo "{\"skill\":\"strategy\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\":
   >> "$_JS_STATE/analytics/skill-usage.jsonl" 2>/dev/null || true
 ```
 
-> **공통 가드레일**: 작업 시작 전 `${CLAUDE_SKILL_DIR}/../templates/guardrails.md` 를 Read 도구로 읽고 §1~§6 전 규칙을 준수하세요.
+> **공통 가드레일**: 작업 시작 전 `${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/templates/guardrails.md` 를 Read 도구로 읽고 §1~§6 전 규칙을 준수하세요.
 
 
 # 취업전략 수립
@@ -266,7 +266,7 @@ target.industries에 공공기관·공기업이 포함되면:
 
 저장 후 브라우저에서 결과를 확인할 수 있도록 안내합니다:
 ```bash
-$CLAUDE_SKILL_DIR/../bin/jobstack-view strategy-roadmap.md
+$CLAUDE_SKILL_DIR~/.hermes/skills/jobstack/bin/# Hermes 웹 대시보드(포트 9443)에서 열람 가능 strategy-roadmap.md
 ```
 
 ---

@@ -27,7 +27,7 @@ echo "$$" > "$_JS_STATE/sessions/$$"
 trap 'rm -f "$_JS_STATE/sessions/$$"' EXIT
 
 # 설정 로딩
-_JS_CONFIG="${CLAUDE_SKILL_DIR}/../bin/jobstack-config"
+_JS_CONFIG="${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/bin/jobstack-config"
 if [ -x "$_JS_CONFIG" ]; then
   PROACTIVE=$("$_JS_CONFIG" get proactive 2>/dev/null || echo "true")
 else
@@ -58,7 +58,7 @@ echo "{\"skill\":\"auto\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\":$$}"
   >> "$_JS_STATE/analytics/skill-usage.jsonl" 2>/dev/null || true
 ```
 
-> **공통 가드레일**: 작업 시작 전 `${CLAUDE_SKILL_DIR}/../templates/guardrails.md` 를 Read 도구로 읽고 §1~§6 전 규칙을 준수하세요.
+> **공통 가드레일**: 작업 시작 전 `${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/templates/guardrails.md` 를 Read 도구로 읽고 §1~§6 전 규칙을 준수하세요.
 
 
 # jobstack auto — 자동 감지 + 단계별 가이드
@@ -106,7 +106,7 @@ echo "{\"skill\":\"auto\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\":$$}"
 
 ### 감지 완료 이벤트 기록
 
-파일·텍스트 감지 및 케이스 판정이 끝나면 Bash로 후속 이벤트를 append합니다(규격은 `${CLAUDE_SKILL_DIR}/../docs/telemetry-events.md`). 실패해도 스킬 동작에 영향이 없어야 합니다:
+파일·텍스트 감지 및 케이스 판정이 끝나면 Bash로 후속 이벤트를 append합니다(규격은 `${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/docs/telemetry-events.md`). 실패해도 스킬 동작에 영향이 없어야 합니다:
 
 ```bash
 echo '{"skill":"auto","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","pid":'$$',"event":"detected","phase":"case-N","no_arg":false}' \
@@ -138,7 +138,7 @@ echo '{"skill":"auto","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","pid":'$$',"event"
   - 기술/자격증
   - 어학성적
 
-  **추출 가드레일** (공통 규칙은 `${CLAUDE_SKILL_DIR}/../templates/guardrails.md` §1 참조):
+  **추출 가드레일** (공통 규칙은 `${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/templates/guardrails.md` §1 참조):
   1. **명시된 사실만 기록** — 이력서에 적혀 있지 않은 어학 급수·재직사·자격증 등을 그럴듯하게 추정해 채우지 않습니다.
   2. **누락 필드는 placeholder로 저장** — 빈 값이나 추정값이 아니라 `[이메일 입력 필요]` 형태로 저장합니다. (이메일 없는 이력서 → `email: "[이메일 입력 필요]"`)
   3. **누락 항목은 AskUserQuestion 1회만** 질문합니다. 답을 못 받으면 placeholder를 유지하고 반복 요구하지 않습니다.
@@ -187,7 +187,7 @@ echo '{"skill":"auto","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","pid":'$$',"event"
 - 통합 리뷰: analytics에 review 스킬 기록 존재
 - 모의면접: interview-history에 기록 존재
 
-**지원 현황 통합** (상태 어휘는 `${CLAUDE_SKILL_DIR}/../docs/tracker-states.md`의 canonical 9상태를 그대로 사용):
+**지원 현황 통합** (상태 어휘는 `${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/docs/tracker-states.md`의 canonical 9상태를 그대로 사용):
 - `$_JS_STATE/tracker/applications.jsonl`을 읽어 진행 중인 지원 건수를 집계하고, 대시보드 하단에 `지원 현황: N건 진행 중` 줄을 출력합니다.
 - 상태는 **저장=영문 키 / 표시=한글 라벨** 원칙을 따릅니다(준비중/지원완료/서류합격/1차면접/2차면접/최종면접/최종합격/불합격/지원취소). `status`가 한글인 구버전 라인은 읽기 시점에 매핑표로 정규화합니다.
 - **7일 정체 넛지**: `updated_at` 기준 7일 이상 상태 변화가 없는 진행 상태(preparing~final) 건에 "○○ 지원 7일째 변화 없음 — 후속 확인?"을 출력합니다. 종결 상태(offer/rejected/withdrawn)는 제외합니다.
@@ -214,7 +214,7 @@ Phase 4의 파일 기반 케이스 분기에 앞서, 사용자 요청이 다음 
 
 감지 결과에 따라 AskUserQuestion으로 다음 단계를 제안합니다.
 
-> **파일 출력 선택지 (모든 Case 공통)**: 각 Case의 선택지에 "최종 파일 출력(.docx)"을 포함합니다. `${CLAUDE_SKILL_DIR}/../bin/jobstack-export`가 있으면 pandoc으로 md→docx 변환하고, pandoc 미설치(exit 2)·변환 실패(exit 3) 시 markdown 본문을 복붙용으로 제공하는 폴백으로 진행합니다. **단, exit 4(미확인 placeholder 잔존)는 폴백 대상이 아닙니다** — markdown을 제출용으로 주지 말고, 출력된 미확인 항목을 사용자에게 채우도록 요청한 뒤 다시 변환합니다. (봇 환경에서는 기존 File output protocol을 따릅니다.)
+> **파일 출력 선택지 (모든 Case 공통)**: 각 Case의 선택지에 "최종 파일 출력(.docx)"을 포함합니다. `${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/bin/jobstack-export`가 있으면 pandoc으로 md→docx 변환하고, pandoc 미설치(exit 2)·변환 실패(exit 3) 시 markdown 본문을 복붙용으로 제공하는 폴백으로 진행합니다. **단, exit 4(미확인 placeholder 잔존)는 폴백 대상이 아닙니다** — markdown을 제출용으로 주지 말고, 출력된 미확인 항목을 사용자에게 채우도록 요청한 뒤 다시 변환합니다. (봇 환경에서는 기존 File output protocol을 따릅니다.)
 
 ### Case 1: 이력서만 있음
 ```
@@ -322,7 +322,7 @@ E) 모의면접 진행
 - **완성 조건**: 1회 첨삭으로 끝이 아닙니다. **진단 → 수정 → 재리뷰 → 파일화(.docx 출력)** 루프까지 도달해야 완성입니다. 첫 진단 후 사용자에게 수정본 재리뷰와 파일 출력을 이어서 제안합니다.
 - 완료 시 다시 대시보드를 업데이트하고 다음 단계 제안
 
-**완료 이벤트 기록**: auto는 진입점이므로 라우팅 결과를 `detected` 이벤트로만 기록하고(위 Phase 1 참조), 퍼널 이벤트(`submitted`/`diagnosed`/`second_review`/`exported`)는 **각 하위 스킬이 자기 시점에** 기록합니다. auto가 `second_review`를 직접 올리면 대응하는 `diagnosed` 없이 분자만 늘어 퍼널이 왜곡되므로, auto에서는 append하지 않습니다(규격 `${CLAUDE_SKILL_DIR}/../docs/telemetry-events.md`).
+**완료 이벤트 기록**: auto는 진입점이므로 라우팅 결과를 `detected` 이벤트로만 기록하고(위 Phase 1 참조), 퍼널 이벤트(`submitted`/`diagnosed`/`second_review`/`exported`)는 **각 하위 스킬이 자기 시점에** 기록합니다. auto가 `second_review`를 직접 올리면 대응하는 `diagnosed` 없이 분자만 늘어 퍼널이 왜곡되므로, auto에서는 append하지 않습니다(규격 `${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/docs/telemetry-events.md`).
 
 ---
 

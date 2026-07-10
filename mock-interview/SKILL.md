@@ -25,7 +25,7 @@ echo "$$" > "$_JS_STATE/sessions/$$"
 trap 'rm -f "$_JS_STATE/sessions/$$"' EXIT
 
 # 설정 로딩
-_JS_CONFIG="${CLAUDE_SKILL_DIR}/../bin/jobstack-config"
+_JS_CONFIG="${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/bin/jobstack-config"
 if [ -x "$_JS_CONFIG" ]; then
   PROACTIVE=$("$_JS_CONFIG" get proactive 2>/dev/null || echo "true")
 else
@@ -58,7 +58,7 @@ echo "{\"skill\":\"mock-interview\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"
   >> "$_JS_STATE/analytics/skill-usage.jsonl" 2>/dev/null || true
 ```
 
-> **공통 가드레일**: 작업 시작 전 `${CLAUDE_SKILL_DIR}/../templates/guardrails.md` 를 Read 도구로 읽고 §1~§6 전 규칙을 준수하세요.
+> **공통 가드레일**: 작업 시작 전 `${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/templates/guardrails.md` 를 Read 도구로 읽고 §1~§6 전 규칙을 준수하세요.
 
 
 ---
@@ -456,7 +456,7 @@ Write로 두 파일을 모두 저장합니다.
 **결과물 뷰어 안내 (필수)**: 저장 후 사용자에게 결과물을 브라우저로 열람·PDF 저장할 수 있음을 반드시 안내합니다:
 
 ```bash
-$CLAUDE_SKILL_DIR/../bin/jobstack-view <리포트.md>
+$CLAUDE_SKILL_DIR~/.hermes/skills/jobstack/bin/# Hermes 웹 대시보드(포트 9443)에서 열람 가능 <리포트.md>
 ```
 스타일링된 HTML로 변환되어 브라우저에서 열리며, "PDF 저장" 버튼으로 PDF 출력도 가능합니다.
 

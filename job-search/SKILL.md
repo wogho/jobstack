@@ -26,7 +26,7 @@ echo "$$" > "$_JS_STATE/sessions/$$"
 trap 'rm -f "$_JS_STATE/sessions/$$"' EXIT
 
 # 설정 로딩
-_JS_CONFIG="${CLAUDE_SKILL_DIR}/../bin/jobstack-config"
+_JS_CONFIG="${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/bin/jobstack-config"
 if [ -x "$_JS_CONFIG" ]; then
   PROACTIVE=$("$_JS_CONFIG" get proactive 2>/dev/null || echo "true")
 else
@@ -47,10 +47,10 @@ fi
 # ─── Playwright 브라우저 스크래퍼 초기화 ─────────────
 # CLAUDE_SKILL_DIR 기반 경로를 우선 시도하되, fetch-jobs.mjs 존재 여부를 검증.
 # 컨테이너에서는 SKILL.md가 ~/.claude/commands/job-search/에 복사되어
-# CLAUDE_SKILL_DIR/../bin 이 실제 bin 위치(/app/skills/jobstack/bin)와 다름.
+# CLAUDE_SKILL_DIR~/.hermes/skills/jobstack/bin 이 실제 bin 위치(/app/skills/jobstack/bin)와 다름.
 # → 경로가 틀렸으면 알려진 절대경로로 fallback.
 if [ -n "$CLAUDE_SKILL_DIR" ]; then
-  _JS_BIN="${CLAUDE_SKILL_DIR}/../bin"
+  _JS_BIN="${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/bin"
 fi
 if [ ! -f "${_JS_BIN:-}/fetch-jobs.mjs" ]; then
   for _try in "/app/skills/jobstack/bin" "$HOME/.claude/skills/jobstack/bin" "/var/jobclaw/skills/jobstack/bin"; do
@@ -85,7 +85,7 @@ echo "{\"skill\":\"job-search\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\
   >> "$_JS_STATE/analytics/skill-usage.jsonl" 2>/dev/null || true
 ```
 
-> **공통 가드레일**: 작업 시작 전 `${CLAUDE_SKILL_DIR}/../templates/guardrails.md` 를 Read 도구로 읽고 §1~§6 전 규칙을 준수하세요.
+> **공통 가드레일**: 작업 시작 전 `${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/templates/guardrails.md` 를 Read 도구로 읽고 §1~§6 전 규칙을 준수하세요.
 
 
 # /job_search — 채용정보 탐색
@@ -346,7 +346,7 @@ site:jobkorea.co.kr "{직무}" 채용
 
 #### fallback UX (수집 실패 시)
 
-도구 한계를 사용자에게 노출하지 않습니다. 상세 규칙은 `${CLAUDE_SKILL_DIR}/../templates/guardrails.md` §2를 참조하세요.
+도구 한계를 사용자에게 노출하지 않습니다. 상세 규칙은 `${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/templates/guardrails.md` §2를 참조하세요.
 
 - **URL WebFetch 실패 또는 이미지 공고 인식 실패**: 실패 원인을 나열하지 말고 "공고 본문을 복사해 붙여주시면 바로 분석합니다" 한 문장으로 요청합니다. (사람인 단축 URL은 위 #118d 순서 — 리다이렉트 재시도 → 실패 시에만 복붙 요청 — 을 먼저 따릅니다.)
 - **4플랫폼 전부 수집 실패**: 해당 섹션을 생략하고 "사람인·잡코리아·원티드에서 직접 확인" 링크를 안내한 뒤 **DONE_WITH_CONCERNS**로 처리합니다.

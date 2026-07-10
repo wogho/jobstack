@@ -25,7 +25,7 @@ echo "$$" > "$_JS_STATE/sessions/$$"
 trap 'rm -f "$_JS_STATE/sessions/$$"' EXIT
 
 # 설정 로딩
-_JS_CONFIG="${CLAUDE_SKILL_DIR}/../bin/jobstack-config"
+_JS_CONFIG="${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/bin/jobstack-config"
 if [ -x "$_JS_CONFIG" ]; then
   PROACTIVE=$("$_JS_CONFIG" get proactive 2>/dev/null || echo "true")
 else
@@ -58,7 +58,7 @@ echo "{\"skill\":\"ncs\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"pid\":$$}" 
   >> "$_JS_STATE/analytics/skill-usage.jsonl" 2>/dev/null || true
 ```
 
-> **공통 가드레일**: 작업 시작 전 `${CLAUDE_SKILL_DIR}/../templates/guardrails.md` 를 Read 도구로 읽고 §1~§6 전 규칙을 준수하세요.
+> **공통 가드레일**: 작업 시작 전 `${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/templates/guardrails.md` 를 Read 도구로 읽고 §1~§6 전 규칙을 준수하세요.
 
 
 # ncs — NCS 역량 매핑
@@ -153,7 +153,7 @@ Phase 3에서는 사용자 자기신고 기반 **잠정 평가**만 합니다. P
 - 인턴/알바 경험 → 직업기초능력 근거
 - 자격증 → 자격증으로 검증 가능한 범위의 지식 근거 (자격증만으로 실제 수행 경험을 부여하지 않음)
 
-경험 1건을 소재 카드로 구조화할 때는 `${CLAUDE_SKILL_DIR}/../templates/experience-methods.md` §1(경험 전환 6단계: 경험 이름 → 당시 문제 → 역할 → 바꾼 행동 → 검증 가능한 변화 → 직무 연결)을 적용합니다. 6단계 중 하나라도 비면 그 경험은 아직 소재가 아니므로 질문으로 채웁니다.
+경험 1건을 소재 카드로 구조화할 때는 `${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/templates/experience-methods.md` §1(경험 전환 6단계: 경험 이름 → 당시 문제 → 역할 → 바꾼 행동 → 검증 가능한 변화 → 직무 연결)을 적용합니다. 6단계 중 하나라도 비면 그 경험은 아직 소재가 아니므로 질문으로 채웁니다.
 
 **신입 빈출 경험 → 직업기초능력 매핑:**
 
@@ -174,7 +174,7 @@ Phase 3에서는 사용자 자기신고 기반 **잠정 평가**만 합니다. P
 
 **수치가 없을 때:**
 
-NCS 타겟은 학생·신입이 다수라 성과 수치가 없는 경우가 기본값입니다. 없는 수치를 지어내지 말고(아래 가드레일 섹션 참조), `${CLAUDE_SKILL_DIR}/../templates/experience-methods.md` §3(수치 폴백 5기준 + 대체 4종)으로 유도합니다.
+NCS 타겟은 학생·신입이 다수라 성과 수치가 없는 경우가 기본값입니다. 없는 수치를 지어내지 말고(아래 가드레일 섹션 참조), `${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/templates/experience-methods.md` §3(수치 폴백 5기준 + 대체 4종)으로 유도합니다.
 
 폴백 5기준(위에서부터 순서대로 적용): ①전후 변화 ②역할 범위 분리 ③정성 근거(피드백·계속 쓰인 양식) ④작은 검증 가능 숫자(예: "3주간 12건 문의 유형 정리") ⑤면접에서 설명 가능한가.
 
@@ -214,7 +214,7 @@ NCS 역량을 자소서에 녹이는 방법을 안내합니다.
 
 ## 가드레일
 
-작업 전 `${CLAUDE_SKILL_DIR}/../templates/guardrails.md` 의 §1~§6을 준수합니다. NCS 매핑·자소서 가이드에서 특히 다음을 지킵니다.
+작업 전 `${CLAUDE_SKILL_DIR}~/.hermes/skills/jobstack/templates/guardrails.md` 의 §1~§6을 준수합니다. NCS 매핑·자소서 가이드에서 특히 다음을 지킵니다.
 
 **생성형 AI 작성 제한 고지**: 일부 공공기관은 자소서의 생성형 AI 작성을 공고에서 제한합니다. NCS 가이드는 대필이 아니라 **본인 경험을 재작성하는 구조 제안**임을 사용자에게 알리고, 최종 문장은 사용자 본인 표현으로 다듬도록 안내합니다. 지원 기관의 AI 활용 규정은 본문에 단정하지 말고 실행 시 해당 기관 공고 원문 또는 WebSearch로 확인합니다(규정 위반 시 불이익 정도는 기관마다 달라 하드코딩하지 않습니다).
 
@@ -237,7 +237,7 @@ NCS 역량을 자소서에 녹이는 방법을 안내합니다.
 
 NCS 매핑 매트릭스가 생성되면 다음 명령으로 브라우저에서 열 수 있습니다:
 ```bash
-$CLAUDE_SKILL_DIR/../bin/jobstack-view <결과파일.md>
+$CLAUDE_SKILL_DIR~/.hermes/skills/jobstack/bin/# Hermes 웹 대시보드(포트 9443)에서 열람 가능 <결과파일.md>
 ```
 매핑 매트릭스는 표 중심 산출물이라 HTML 뷰어에서 보기 편합니다 — 결과물 생성 시 사용자에게 뷰어 사용을 안내하세요.
 
